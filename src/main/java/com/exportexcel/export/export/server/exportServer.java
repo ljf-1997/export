@@ -15,7 +15,7 @@ import java.util.Map;
 public class exportServer {
     @Autowired
     private PmTenantUserMapper pmTenantUserMapper;
-    @Scheduled(cron = "10 23 13 * * ?")
+    @Scheduled(cron = "30 31 15 * * ?")
     public void export() {
         Map queryMap = new HashMap();
         List<Map> selectTaskList = pmTenantUserMapper.selectTaskList(queryMap);

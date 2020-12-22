@@ -7,7 +7,7 @@
         obj_name
         FROM misp.pm_tenant_user
         WHERE task_time >= #{startTime}
-        AND task_time &lt;= #{startTime}
+        AND task_time &lt;= #{endTime}
         group by task_time
         order by task_time
     </select>
