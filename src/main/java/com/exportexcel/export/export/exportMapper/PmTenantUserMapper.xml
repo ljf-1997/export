@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.exportexcel.export.export.exportMapper.PmTenantUserMapper">
+    <select id="selectTaskList" resultType="java.util.Map">
+        SELECT distinct task_time,
+        task_name,
+        obj_name
+        FROM misp.pm_tenant_user
+        WHERE task_time >= #{startTime}
+        AND task_time &lt;= #{startTime}
+        group by task_time
+        order by task_time
+    </select>
+</mapper>
