@@ -6,6 +6,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.exportexcel.utils.Result;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -19,10 +20,6 @@ public class exportServer {
     private PmTenantUserMapper pmTenantUserMapper;
     @Scheduled(cron = "30 * * * * ?")
     public void export() {
-//        private static String driverLocal = "com.mysql.jdbc.Driver";
-//        private static String urlLocal = "jdbc:mysql://misp.server:8066/misp";
-//        private static String userLocal = "misp";
-//        private static String passwordLocal = "Misp.Mysql2018";
         Map queryMap = new HashMap();
         Calendar yesterdayStart = Calendar.getInstance();
         yesterdayStart.add(Calendar.DATE,-2);
@@ -40,9 +37,13 @@ public class exportServer {
         queryMap.put("startTime",sdf.format(yesterdayStart.getTime()));
         queryMap.put("endTime",sdf.format(todayEnd.getTime()));
         List<Map> selectTaskList = pmTenantUserMapper.selectTaskList(queryMap);
+        readExcel();
         for (Map tmp:selectTaskList) {
 
         }
-        System.out.println("hello world");
+    }
+    public Result readExcel() {
+        Result result=new Result();
+        return result;
     }
 }
