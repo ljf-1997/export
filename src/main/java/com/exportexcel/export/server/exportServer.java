@@ -2,6 +2,9 @@ package com.exportexcel.export.server;
 
 import com.exportexcel.export.exportMapper.PmTenantUserMapper;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.exportexcel.utils.StringUtils;
@@ -43,6 +46,7 @@ public class exportServer {
         queryMap.put("startTime", sdf.format(yesterdayStart.getTime()));
         queryMap.put("endTime", sdf.format(todayEnd.getTime()));
         List<Map<String,String>> selectTaskList = pmTenantUserMapper.selectTaskList(queryMap);
+        System.out.println(selectTaskList);
         String[] timeArray = {"00:00:00", "00:30:00", "01:00:00", "01:30:00", "02:00:00", "02:30:00", "03:00:00", "03:30:00", "04:00:00", "04:30:00"
                 , "05:00:00", "05:30:00", "06:00:00", "06:30:00", "07:00:00", "07:30:00", "08:00:00", "08:30:00", "09:00:00", "09:30:00", "10:00:00", "10:30:00"
                 , "11:00:00", "11:30:00", "12:00:00", "12:30:00", "13:00:00", "13:30:00", "14:00:00", "14:30:00", "15:00:00", "15:30:00", "16:00:00"
@@ -56,8 +60,8 @@ public class exportServer {
                 , "后地板R1GUN1", "后地板R2GUN1", "后地板R2GUN2", "后地板R2GUN3", "后地板R3GUN1", "后地板R3GUN2", "后地板R5GUN1", "后地板R5GUN2", "后地板R6GUN1", "后地板R6GUN2"
                 , "后地板R7GUN1", "后地板R7GUN2", "后地板R8GUN1", "后地板R8GUN2", "后地板R9GUN1", "后地板R9GUN2", "后地板R12GUN1", "后地板R12GUN2", "后地板R13GUN1", "后地板R13GUN2"
                 , "后地板R14GUN1", "前地板010R2GUN1", "前地板010R2GUN2", "前地板010R3GUN1", "前地板010R3GUN2", "前地板050R4GUN1"
-                , "前机舱010R1GUN1", "前机舱010R1GUN2", "前机舱010R2GUN1", "前机舱010R2GUN2", "前机舱020R3GUN1", "前机舱020R4GUN1", "前机舱030R6GUN1", "前机舱030R7GUN1"
-                , "前机舱040R8GUN1", "前机舱040R8GUN2", "前机舱050R9GUN1", "前机舱050R9GUN2", "前机舱050R11GUN1", "前机舱050R11GUN2", "前机舱060R12GUN1", "前机舱060R12GUN2"
+                , "前机舱R1GUN1", "前机舱R1GUN2", "前机舱R2GUN1", "前机舱R2GUN2", "前机舱R3GUN1", "前机舱R4GUN1", "前机舱R6GUN1", "前机舱R7GUN1"
+                , "前机舱R8GUN1", "前机舱R8GUN2", "前机舱R9GUN1", "前机舱R9GUN2", "前机舱R11GUN1", "前机舱R11GUN2", "前机舱R12GUN1", "前机舱R12GUN2"
                 , "主焊MB020R01GUN1", "主焊MB020R01GUN2", "主焊MB020R02GUN1", "主焊MB020R02GUN2", "主焊MB020R03GUN1", "主焊MB020R03GUN2", "主焊MB020R04GUN1", "主焊MB020R04GUN2"
                 , "主焊MB030R24H7GUN1", "主焊MB030R24H7GUN2", "主焊MB030R24HS7GUN1", "主焊MB030R24HS7GUN2", "主焊MB040R05GUN1", "主焊MB040R05GUN2", "主焊MB040R06GUN1", "主焊MB040R06GUN2"
                 , "主焊MB040R07GUN1", "主焊MB040R08GUN1", "主焊MB040R09GUN1", "主焊MB040R10GUN1", "主焊MB050R11GUN1", "主焊MB050R11GUN2", "主焊MB050R12GUN1", "主焊MB050R12GUN2", "主焊MB070R13GUN1"
@@ -100,7 +104,7 @@ public class exportServer {
 //                        System.out.println("-----机器人名："+nameArray[j]+"-----时间："+timeArray[i]);
 //                        System.out.println("-----机器人名数："+j+"-----时间数："+j);
                         if (newTime.equals(timeArray[i]) && equipmentName.equals(nameArray[j])) {
-                            String zuobiao = (j+4) + "," + (i + 12);
+                            String zuobiao = (j+5) + "," + (i+13);
                             System.out.println(equipmentName+"-----"+zuobiao+"-----"+newTime);
                             zb.add(zuobiao);
                         }
@@ -114,13 +118,16 @@ public class exportServer {
         XSSFWorkbook workbook = null;
         try {
             workbook = new XSSFWorkbook(new FileInputStream(template));
-            Sheet sheet = workbook.getSheetAt(1);
+            XSSFSheet sheet = workbook.getSheet("Sheet2");
             for (String val : zb) {
                 String[] value = val.split(",");
-                sheet.getRow(Integer.valueOf(value[0]).intValue()).getCell(Integer.valueOf(value[1]).intValue()).setCellValue("laji");
+                sheet.getRow(Integer.valueOf(value[0]).intValue()).getCell(Integer.valueOf(value[1]).intValue()).setCellValue("goood!");
             }
-            sheet.getRow(20).getCell(13).setCellValue("diao");
-            sheet.getRow(21).getCell(14).setCellValue("mao");
+//            XSSFRow row = sheet.getRow(4);
+//            XSSFCell cell = row.getCell(13);
+//            cell.setCellValue("giao");
+//            sheet.getRow(0).getCell(0).setCellValue("diao");
+//            sheet.getRow(21).getCell(14).setCellValue("mao");
             FileOutputStream out = new FileOutputStream(new File("C:\\Users\\12858\\Desktop\\点检表\\1.xlsx"));
             workbook.write(out);
             out.close();
@@ -128,5 +135,9 @@ public class exportServer {
             e.printStackTrace();
         }
         System.out.println("导出成功！！！");
+    }
+
+    public static void main(String[] args) {
+
     }
 }
