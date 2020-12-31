@@ -7,5 +7,5 @@ import java.util.Map;
 
 @Mapper
 public interface PmTenantUserMapper{
-    List<Map> selectTaskList(Map map);
+    List<Map<String,String>> selectTaskList(Map map);
 }
