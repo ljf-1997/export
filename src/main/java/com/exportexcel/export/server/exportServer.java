@@ -1,9 +1,6 @@
 package com.exportexcel.export.server;
 
 import com.exportexcel.export.exportMapper.PmTenantUserMapper;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +8,6 @@ import com.exportexcel.utils.StringUtils;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -31,14 +27,14 @@ public class exportServer {
         //查询红旗电极帽报警任务推送的信息
         Map queryMap = new HashMap();
         Calendar yesterdayStart = Calendar.getInstance();
-        yesterdayStart.add(Calendar.DATE, -2);
+        yesterdayStart.add(Calendar.DATE, -3);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         yesterdayStart.set(Calendar.HOUR_OF_DAY, 23);
         yesterdayStart.set(Calendar.MINUTE, 58);
         yesterdayStart.set(Calendar.SECOND, 59);
         System.out.println(sdf.format(yesterdayStart.getTime()));
         Calendar todayEnd = Calendar.getInstance();
-        todayEnd.add(Calendar.DATE, -1);
+        todayEnd.add(Calendar.DATE, -2);
         todayEnd.set(Calendar.HOUR_OF_DAY, 23);
         todayEnd.set(Calendar.MINUTE, 58);
         todayEnd.set(Calendar.SECOND, 59);
@@ -101,11 +97,8 @@ public class exportServer {
                         }
                         String newTime = sdff.format(cal.getTime());
                         String equipmentName = StringUtils.checkNull(tmp.get("objName"));
-//                        System.out.println("-----机器人名："+nameArray[j]+"-----时间："+timeArray[i]);
-//                        System.out.println("-----机器人名数："+j+"-----时间数："+j);
                         if (newTime.equals(timeArray[i]) && equipmentName.equals(nameArray[j])) {
                             String zuobiao = (j+5) + "," + (i+13);
-                            System.out.println(equipmentName+"-----"+zuobiao+"-----"+newTime);
                             zb.add(zuobiao);
                         }
                     } catch (Exception e) {
@@ -121,23 +114,14 @@ public class exportServer {
             XSSFSheet sheet = workbook.getSheet("Sheet2");
             for (String val : zb) {
                 String[] value = val.split(",");
-                sheet.getRow(Integer.valueOf(value[0]).intValue()).getCell(Integer.valueOf(value[1]).intValue()).setCellValue("goood!");
+                sheet.getRow(Integer.valueOf(value[0]).intValue()).getCell(Integer.valueOf(value[1]).intValue()).setCellValue("√");
             }
-//            XSSFRow row = sheet.getRow(4);
-//            XSSFCell cell = row.getCell(13);
-//            cell.setCellValue("giao");
-//            sheet.getRow(0).getCell(0).setCellValue("diao");
-//            sheet.getRow(21).getCell(14).setCellValue("mao");
-            FileOutputStream out = new FileOutputStream(new File("C:\\Users\\12858\\Desktop\\点检表\\1.xlsx"));
+            FileOutputStream out = new FileOutputStream(new File("C:\\Users\\12858\\Desktop\\点检表\\红旗电极帽点检数据统计1-.xlsx"));
             workbook.write(out);
             out.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
         System.out.println("导出成功！！！");
-    }
-
-    public static void main(String[] args) {
-
     }
 }
