@@ -8,4 +8,9 @@ import java.util.Map;
 @Mapper
 public interface PmTenantUserMapper{
     List<Map<String,String>> selectTaskList(Map map);
+
+    List<Map<String,String>> list(Map map);
+
+    List<Map> eqId();
+
 }

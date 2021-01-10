@@ -1,31 +1,126 @@
 package com.exportexcel.export.server;
 
 import com.exportexcel.export.exportMapper.PmTenantUserMapper;
+import com.exportexcel.utils.thread.Executer;
+import com.exportexcel.utils.thread.Job;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.exportexcel.utils.StringUtils;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Component
 @EnableScheduling
 public class exportServer {
+
+    private final static Logger log = LoggerFactory.getLogger(exportChangeCop.class);
+
     @Autowired(required = false)
     private PmTenantUserMapper pmTenantUserMapper;
 
-    @Scheduled(cron = "10 * * * * ?")
-    public void export() {
-        //查询红旗电极帽报警任务推送的信息
-        Map queryMap = new HashMap();
+    @Scheduled(cron = "10 12 16 * * ?")
+    public void export() throws FileNotFoundException {
+        List<Map> value = new ArrayList<>();
+        value = dealValues();
+//        Executer executer = new Executer(50);
+//        try {
+//            executer.fork(new Job() {
+//                @Override
+//                public void execute(Object[] args) {
+//                    try {
+//                        value.addAll(dealValues());
+//                    } catch (Exception e) {
+//                        log.error(e.getMessage(), e);
+//                    }
+//                }
+//            });
+//        } catch (Exception e) {
+//            log.error(e.getMessage(), e);
+//        }
+        System.out.println("数据读取成功！");
+        XSSFWorkbook workbook = null;
+        try {
+            String templates = "C:\\Users\\12858\\Desktop\\2.xlsx";
+            workbook = new XSSFWorkbook(new FileInputStream(templates));
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println(e);
+        }
+        // 生成一个表格
+        XSSFSheet sheet = workbook.getSheetAt(0);
+        // 遍历集合数据，产生数据行
+        int indexs = 1;
+            for (Map m : value) {
+                int i = 0;
+                if (value != null) {
+                    XSSFRow row = sheet.getRow(indexs);
+                    if (row == null) {
+                        row = sheet.createRow(indexs);
+                    }
+                for (Object entryNew : m.values()) {
+                    XSSFCell cell = row.getCell(i);
+                    if (cell == null) {
+                        cell = row.createCell(i);
+                    }
+                    cell.setCellValue(entryNew.toString());
+                    i++;
+                }
+                    indexs++;
+            }
+                try {
+                    FileOutputStream out = new FileOutputStream(new File("C:\\Users\\12858\\Desktop\\2.xlsx"));
+                    workbook.write(out);
+                    out.close();
+                }catch (IOException e) {
+                    e.printStackTrace();
+                    System.out.println(e);
+                }
+            }
+        System.out.println("导出成功！");
+    }
+
+    private List<Map> dealValues() {
+        List<Map> eqId = pmTenantUserMapper.eqId();
+        List lists = new ArrayList();
+        for (Map tmp : eqId) {
+            lists.add(StringUtils.checkNull(tmp.get("eqId")));
+        }
+        Map map = new HashMap();
+        map.put("equipmentId", lists);
+        map.put("startTime", "1606752000000");
+        map.put("endTime", "1610208000000");
+        List<Map<String, String>> list = pmTenantUserMapper.list(map);
+        Map<String,String> tmpMap = new HashMap();
+        tmpMap.put("dotSum", "0");
+        List listMap = new ArrayList();
+        for (Map tmp : list) {
+            if (StringUtils.checkInt(tmp.get("dotSum")) > StringUtils.checkInt(tmpMap.get("dotSum"))) {
+                tmpMap.put("dotSum", StringUtils.checkNull(tmp.get("dotSum")));
+                tmpMap.put("eqName", StringUtils.checkNull(tmp.get("eqName")));
+                tmpMap.put("timestamp", StringUtils.checkNull(tmp.get("timestamp")));
+            }
+            if (StringUtils.checkInt(tmp.get("dotSum")) == 0) {
+                Map mp = new HashMap();
+                mp.put("dotSum", StringUtils.checkInt(tmpMap.get("dotSum")));
+                mp.put("eqName", StringUtils.checkNull(tmpMap.get("eqName")));
+                mp.put("timestamp", StringUtils.checkNull(tmpMap.get("timestamp")));
+                listMap.add(mp);
+                tmpMap.clear();
+            }
+        }
+        return listMap;
+    }       //查询红旗电极帽报警任务推送的信息
+       /* Map queryMap = new HashMap();
         Calendar yesterdayStart = Calendar.getInstance();
         yesterdayStart.add(Calendar.DATE, -2);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -128,4 +223,8 @@ public class exportServer {
             System.out.println("红旗今天不生产！！！");
         }
     }
+
+    public static void main(String[] args) {
+
+    }*/
 }
