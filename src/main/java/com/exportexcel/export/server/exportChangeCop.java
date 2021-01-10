@@ -160,7 +160,7 @@ public class exportChangeCop {
     }
 
     private static Map dealValue(List<Map> value) {
-        Map<String, Map<String, String>> map = new HashMap(1000);
+        Map<String, Map<String, String>> map = new IdentityHashMap(1000);
         //处理数据，生成报表
         for (Map tmp : value) {
             String name = StringUtils.checkNull(tmp.get("name"));
