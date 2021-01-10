@@ -32,75 +32,77 @@ public class exportChangeCop {
         //读取工作表
         XSSFWorkbook workbook = null;
         XSSFWorkbook wb = null;
-        Map<String, Map<String,String>> map = new HashMap();
+        Map<String, Map<String, String>> map = new HashMap();
         try {
+            int indexs = 1;
             File dir = new File("C:\\Users\\12858\\Desktop\\20年项目出差");
             String[] names = dir.list();
+            List<Map> value = new ArrayList<>();
             for (int j = 0; j < names.length; j++) {
                 System.out.println(names[j]);
                 String template = "C:\\Users\\12858\\Desktop\\20年项目出差\\" + names[j];
                 System.out.println(template);
                 workbook = new XSSFWorkbook(new FileInputStream(template));
                 int index = workbook.getNumberOfSheets();
-                Executer executer = new Executer(50);
-                List<Map> value = new ArrayList<>();
+//                Executer executer = new Executer(50);
+//                try {
+//                    executer.fork(new Job() {
+//                        @Override
+//                        public void execute(Object[] args) {
+//                            try {
+//                                calculateData(value,finalWorkbook, index);
+//                            } catch (IOException e) {
+//                                log.error(e.getMessage(), e);
+//                            }
+//                        }
+//                    });
+//                } catch (Exception e) {
+//                    log.error(e.getMessage(), e);
+//                }
+                calculateData(value, workbook, index,names[j]);
+            }
+                map = dealValue(value);
                 try {
-                    XSSFWorkbook finalWorkbook = workbook;
-                    executer.fork(new Job() {
-                        @Override
-                        public void execute(Object[] args) {
-                            try {
-                                value.addAll(calculateData(finalWorkbook, index));
-                            } catch (IOException e) {
-                                log.error(e.getMessage(), e);
-                            }
-                        }
-                    });
-                    map = dealValue(value,names[j]);
-                } catch (Exception e) {
-                    log.error(e.getMessage(), e);
+                    String templates = "C:\\Users\\12858\\Desktop\\1.xlsx";
+                    wb = new XSSFWorkbook(new FileInputStream(templates));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    System.out.println(e);
                 }
-            }
-           int indexs = 1;
-            try {
-                String templates = "C:\\Users\\12858\\Desktop\\2.xlsx";
-                wb = new XSSFWorkbook(new FileInputStream(templates));
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.out.println(e);
-            }
-            XSSFSheet sheet = wb.getSheetAt(0);
-            for (Map.Entry<String, Map<String,String>> entry : map.entrySet()) {
-                int i = 0;
-                XSSFRow row = sheet.getRow(indexs);
-                if (row == null) {
-                    row = sheet.createRow(indexs);
-                }
-                Map<String, String> tmp = entry.getValue();
-                for (Map.Entry<String, String> entryNew : tmp.entrySet()) {
-                    if (entryNew.getKey().equals("number")) {
-                        int k = StringUtils.checkInt(tmp.get("mounth")) + 3;
-                        XSSFCell cell = row.getCell(k);
-                        if (cell == null) {
-                            cell = row.createCell(k);
-                        }
-                        cell.setCellValue(entryNew.getValue());
-                    } else {
-                        XSSFCell cell = row.getCell(i);
-                        if (cell == null) {
-                            cell = row.createCell(i);
-                        }
-                        cell.setCellValue(entryNew.getValue());
+                XSSFSheet sheet = wb.getSheetAt(0);
+                for (Map.Entry<String, Map<String, String>> entry : map.entrySet()) {
+                    int i = 0;
+                    XSSFRow row = sheet.getRow(indexs);
+                    if (row == null) {
+                        row = sheet.createRow(indexs);
                     }
-                    i++;
+                    Map<String, String> tmp = entry.getValue();
+                    for (Map.Entry<String, String> entryNew : tmp.entrySet()) {
+                        if (entryNew.getKey().equals("number")) {
+                            int k = StringUtils.checkInt(tmp.get("mounth")) + 4;
+                            XSSFCell cell = row.getCell(k);
+                            if (cell == null) {
+                                cell = row.createCell(k);
+                            }
+                            cell.setCellValue(entryNew.getValue());
+                        } else if(entryNew.getKey().equals("mounth")){
+                            XSSFCell cell = row.getCell(i);
+                        }
+                        else {
+                            XSSFCell cell = row.getCell(i);
+                            if (cell == null) {
+                                cell = row.createCell(i);
+                            }
+                            cell.setCellValue(entryNew.getValue());
+                        }
+                        i++;
+                    }
+                    indexs++;
                 }
-                indexs++;
-            }
-            FileOutputStream out = new FileOutputStream(new File("C:\\Users\\12858\\Desktop\\1.xlsx"));
-            wb.write(out);
-            out.close();
-            System.out.println("导出完成！");
-            System.out.println(map);
+                FileOutputStream out = new FileOutputStream(new File("C:\\Users\\12858\\Desktop\\1.xlsx"));
+                wb.write(out);
+                out.close();
+                System.out.println("导出完成！");
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println(e);
@@ -111,12 +113,12 @@ public class exportChangeCop {
         }
     }
 
-    private static List<Map> calculateData(XSSFWorkbook workbook, int index) throws IOException {
-        List<Map> values = new ArrayList<>();
+    private static List<Map> calculateData(List<Map> values, XSSFWorkbook workbook, int index, String fileName) throws IOException {
         for (int i = 0; i < index; i++) {
             XSSFSheet sheet = workbook.getSheetAt(i);
             String sheetName = StringUtils.checkNull(sheet.getSheetName());
-            if (sheetName.contains("出勤") || sheetName.contains("人员") || sheetName.contains("外勤") ||sheetName.contains("出差")) continue;
+            if (sheetName.contains("出勤") || sheetName.contains("人员") || sheetName.contains("外勤") || sheetName.contains("出差"))
+                continue;
             // 行数。
             int rowNumbers = sheet.getLastRowNum() + 1;
             // Excel第一行。
@@ -145,41 +147,52 @@ public class exportChangeCop {
                             val.put("wbs", StringUtils.checkNull(cell));
                             break;
                     }
+                    String[] mounth = fileName.split("年|月");
+                    val.put("mounth", mounth[1]);
                 }
                 if (!val.isEmpty()) {
                     values.add(val);
                 }
             }
         }
-        System.out.println(values);
         workbook.close();
         return values;
     }
-    private static Map dealValue(List<Map> value,String fileName){
-        Map<String, Map<String,String>> map = new HashMap(1000);
+
+    private static Map dealValue(List<Map> value) {
+        Map<String, Map<String, String>> map = new HashMap(1000);
         //处理数据，生成报表
         for (Map tmp : value) {
             String name = StringUtils.checkNull(tmp.get("name"));
             String attendance = StringUtils.checkNull(tmp.get("attendance"));
             String wbs = StringUtils.checkNull(tmp.get("wbs"));
-            if ((map.containsKey(name) && map.get(name).get("attendance").equals(attendance) && map.get(name).get("wbs").equals(wbs)) || (map.containsKey(name) && map.get(name).get("attendance").equals(attendance)) || (map.containsKey(name) && map.get(name).get("wbs").equals(wbs))) {
+            if ((map.containsKey(name) && map.get(name).get("attendance").equals(attendance) && map.get(name).get("wbs").equals(wbs))) {
                 Map<String, String> data = map.get(name);
                 String number = StringUtils.checkInt(data.get("number")) + 1 + "";
                 data.put("number", number);
                 map.put(name, data);
-                System.out.println(map);
             } else {
-                String[] mounth = fileName.split("年|月");
-                Map<String, String> tmpMap = new HashMap();
+                Map<String, String> tmpMap = new TreeMap<>();
                 tmpMap.put("name", StringUtils.checkNull(tmp.get("name")));
                 tmpMap.put("wbs", StringUtils.checkNull(tmp.get("wbs")));
                 tmpMap.put("attendance", StringUtils.checkNull(tmp.get("attendance")));
                 tmpMap.put("number", "1");
-                tmpMap.put("mounth", mounth[1]);
+                tmpMap.put("mounth", StringUtils.checkNull(tmp.get("mounth")));
                 map.put(name, tmpMap);
-                System.out.println(map);
             }
         }
         return map;
+    }
+}
+class MyHashMap extends HashMap
+{
+    @Override
+    public Object put(Object key, Object value)
+    {
+        //如果已经存在key，不覆盖原有key对应的value
+        if(!this.containsKey(key))
+            return super.put(key, value);
+
+        return null;
     }
 }
