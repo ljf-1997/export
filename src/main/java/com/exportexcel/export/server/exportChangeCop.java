@@ -44,65 +44,49 @@ public class exportChangeCop {
                 System.out.println(template);
                 workbook = new XSSFWorkbook(new FileInputStream(template));
                 int index = workbook.getNumberOfSheets();
-//                Executer executer = new Executer(50);
-//                try {
-//                    executer.fork(new Job() {
-//                        @Override
-//                        public void execute(Object[] args) {
-//                            try {
-//                                calculateData(value,finalWorkbook, index);
-//                            } catch (IOException e) {
-//                                log.error(e.getMessage(), e);
-//                            }
-//                        }
-//                    });
-//                } catch (Exception e) {
-//                    log.error(e.getMessage(), e);
-//                }
-                calculateData(value, workbook, index,names[j]);
+                calculateData(value, workbook, index, names[j]);
             }
-                map = dealValue(value);
-                try {
-                    String templates = "C:\\Users\\12858\\Desktop\\1.xlsx";
-                    wb = new XSSFWorkbook(new FileInputStream(templates));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    System.out.println(e);
+            map = dealValue(value);
+            try {
+                String templates = "C:\\Users\\12858\\Desktop\\1.xlsx";
+                wb = new XSSFWorkbook(new FileInputStream(templates));
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.out.println(e);
+            }
+            XSSFSheet sheet = wb.getSheetAt(0);
+            for (Map.Entry<String, Map<String, String>> entry : map.entrySet()) {
+                int i = 0;
+                XSSFRow row = sheet.getRow(indexs);
+                if (row == null) {
+                    row = sheet.createRow(indexs);
                 }
-                XSSFSheet sheet = wb.getSheetAt(0);
-                for (Map.Entry<String, Map<String, String>> entry : map.entrySet()) {
-                    int i = 0;
-                    XSSFRow row = sheet.getRow(indexs);
-                    if (row == null) {
-                        row = sheet.createRow(indexs);
-                    }
-                    Map<String, String> tmp = entry.getValue();
-                    for (Map.Entry<String, String> entryNew : tmp.entrySet()) {
-                        if (entryNew.getKey().equals("number")) {
-                            int k = StringUtils.checkInt(tmp.get("mounth")) + 4;
-                            XSSFCell cell = row.getCell(k);
-                            if (cell == null) {
-                                cell = row.createCell(k);
-                            }
-                            cell.setCellValue(entryNew.getValue());
-                        } else if(entryNew.getKey().equals("mounth")){
-                            XSSFCell cell = row.getCell(i);
+                Map<String, String> tmp = entry.getValue();
+                for (Map.Entry<String, String> entryNew : tmp.entrySet()) {
+                    if (entryNew.getKey().equals("number")) {
+                        int k = StringUtils.checkInt(tmp.get("mounth")) + 4;
+                        XSSFCell cell = row.getCell(k);
+                        if (cell == null) {
+                            cell = row.createCell(k);
                         }
-                        else {
-                            XSSFCell cell = row.getCell(i);
-                            if (cell == null) {
-                                cell = row.createCell(i);
-                            }
-                            cell.setCellValue(entryNew.getValue());
+                        cell.setCellValue(entryNew.getValue());
+                    } else if (entryNew.getKey().equals("mounth")) {
+                        XSSFCell cell = row.getCell(i);
+                    } else {
+                        XSSFCell cell = row.getCell(i);
+                        if (cell == null) {
+                            cell = row.createCell(i);
                         }
-                        i++;
+                        cell.setCellValue(entryNew.getValue());
                     }
-                    indexs++;
+                    i++;
                 }
-                FileOutputStream out = new FileOutputStream(new File("C:\\Users\\12858\\Desktop\\1.xlsx"));
-                wb.write(out);
-                out.close();
-                System.out.println("导出完成！");
+                indexs++;
+            }
+            FileOutputStream out = new FileOutputStream(new File("C:\\Users\\12858\\Desktop\\1.xlsx"));
+            wb.write(out);
+            out.close();
+            System.out.println("导出完成！");
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println(e);
@@ -133,19 +117,23 @@ public class exportChangeCop {
                 if (row == null) continue;
                 Map val = new HashMap();
                 for (int col = 0; col < cells; col++) {
-                    //log.info("sheetName::" + sheetName + "  colNumber:" + col + "   rowNumber:" + row.getRowNum());
                     Cell cell = row.getCell(col);
                     if (cell == null || ((XSSFCell) cell).getRawValue() == null) continue;
+                    if ("".equalsIgnoreCase(StringUtils.checkNull(cell))) {
+                        System.out.println("cell为空" + "-----sheet：" + sheetName + "-----行名：" + row + "-----列名：" + col + "-----文件名：" + fileName);
+                    }
                     switch (col) {
                         case 1:
                             val.put("name", StringUtils.checkNull(cell));
                             break;
-                        case 5:
+                        case 2:
                             val.put("attendance", StringUtils.checkNull(cell));
                             break;
-                        case 8:
+                        case 3:
                             val.put("wbs", StringUtils.checkNull(cell));
                             break;
+                        default:
+                            System.out.println("不在目标列中:" + col + ",value为：" + cell);
                     }
                     String[] mounth = fileName.split("年|月");
                     val.put("mounth", mounth[1]);
@@ -184,13 +172,12 @@ public class exportChangeCop {
         return map;
     }
 }
-class MyHashMap extends HashMap
-{
+
+class MyHashMap extends HashMap {
     @Override
-    public Object put(Object key, Object value)
-    {
+    public Object put(Object key, Object value) {
         //如果已经存在key，不覆盖原有key对应的value
-        if(!this.containsKey(key))
+        if (!this.containsKey(key))
             return super.put(key, value);
 
         return null;
