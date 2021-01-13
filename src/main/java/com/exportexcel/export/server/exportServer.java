@@ -28,10 +28,10 @@ public class exportServer {
     @Autowired(required = false)
     private PmTenantUserMapper pmTenantUserMapper;
 
-    @Scheduled(cron = "10 12 16 * * ?")
+    @Scheduled(cron = "10 * * * * ?")
     public void export() throws FileNotFoundException {
-        List<Map> value = new ArrayList<>();
-        value = dealValues();
+//        List<Map> value = new ArrayList<>();
+//        value = dealValues();
 //        Executer executer = new Executer(50);
 //        try {
 //            executer.fork(new Job() {
@@ -47,7 +47,7 @@ public class exportServer {
 //        } catch (Exception e) {
 //            log.error(e.getMessage(), e);
 //        }
-        System.out.println("数据读取成功！");
+       /* System.out.println("数据读取成功！");
         XSSFWorkbook workbook = null;
         try {
             String templates = "C:\\Users\\12858\\Desktop\\2.xlsx";
@@ -118,9 +118,10 @@ public class exportServer {
                 tmpMap.clear();
             }
         }
-        return listMap;
-    }       //查询红旗电极帽报警任务推送的信息
-       /* Map queryMap = new HashMap();
+        return listMap;*/
+
+    //查询红旗电极帽报警任务推送的信息
+        Map queryMap = new HashMap();
         Calendar yesterdayStart = Calendar.getInstance();
         yesterdayStart.add(Calendar.DATE, -2);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -223,8 +224,4 @@ public class exportServer {
             System.out.println("红旗今天不生产！！！");
         }
     }
-
-    public static void main(String[] args) {
-
-    }*/
 }
