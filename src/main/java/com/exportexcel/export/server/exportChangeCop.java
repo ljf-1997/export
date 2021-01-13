@@ -130,7 +130,17 @@ public class exportChangeCop {
                             val.put("attendance", StringUtils.checkNull(cell));
                             break;
                         case 3:
-                            val.put("wbs", StringUtils.checkNull(cell));
+                            String[] wbsArray = null;
+                            if(cell !=null){
+                                wbsArray = StringUtils.checkNull(cell).split("-");
+                            }
+                            String wbs = null;
+                            if(wbsArray.length>=2){
+                                wbs = wbsArray[0]+"-"+wbsArray[1];
+                                val.put("wbs", wbs);
+                            }else {
+                                val.put("wbs", StringUtils.checkNull(cell));
+                            }
                             break;
                         default:
                             System.out.println("不在目标列中:" + col + ",value为：" + cell);
