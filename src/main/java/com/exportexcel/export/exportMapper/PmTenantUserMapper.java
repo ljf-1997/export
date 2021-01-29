@@ -13,4 +13,6 @@ public interface PmTenantUserMapper{
 
     List<Map> eqId();
 
+    void updataValue(Map map);
+
 }

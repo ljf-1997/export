@@ -1,7 +1,5 @@
 package com.exportexcel.export.server;
 
-import com.exportexcel.utils.thread.Executer;
-import com.exportexcel.utils.thread.Job;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -10,18 +8,12 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import com.exportexcel.utils.StringUtils;
-import org.springframework.boot.autoconfigure.batch.BatchProperties;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class exportChangeCop {
@@ -183,13 +175,3 @@ public class exportChangeCop {
     }
 }
 
-class MyHashMap extends HashMap {
-    @Override
-    public Object put(Object key, Object value) {
-        //如果已经存在key，不覆盖原有key对应的value
-        if (!this.containsKey(key))
-            return super.put(key, value);
-
-        return null;
-    }
-}

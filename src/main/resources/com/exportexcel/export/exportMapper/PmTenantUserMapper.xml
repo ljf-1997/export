@@ -11,11 +11,10 @@
         ORDER BY task_time
     </select>
     <select id="eqId" resultType="java.util.Map">
-        SELECT EQUIPMENT_ID AS eqId
+        SELECT EQUIPMENT_ID AS eqId,
+        EQUIPMENT_NAME AS eqName
         FROM pm_equipment_info
-        WHERE EQUIPMENT_NAME NOT LIKE 'MB%'
-        AND EQUIPMENT_NAME NOT LIKE 'SB%'
-        AND IS_DEL='N'
+        WHERE IS_DEL='N'
     </select>
     <select id="list" resultType="java.util.Map">
         SELECT
@@ -25,12 +24,19 @@
         val as dotSum
         from mp_realtime_consum_data tc
         left join pm_equipment_info pi on tc.equipment_id = pi.equipment_id
-        where tc.equipment_id in
-        <foreach collection="equipmentId" index="index" item="eqId" open="(" separator="," close=")">
-            #{eqId}
-        </foreach>
+        where tc.equipment_id = #{eqId}
         and tc.data_type=1
         and  create_time &gt;= #{startTime}
         and create_time &lt;= #{endTime}
     </select>
+    <update id="updataValue" parameterType="java.util.Map">
+		update pm_consumables_equipment
+		<set>
+		user_low_threshold = #{firstThreshold,jdbcType=BIGINT},
+        user_high_threshold = #{secondThreshold,jdbcType=BIGINT},
+        time_alar_threshold = #{finalThreshold,jdbcType=BIGINT}
+        </set>
+		where equipment_id = #{eqId,jdbcType=BIGINT}
+		and cons_id = #{consId,jdbcType=BIGINT}
+	</update>
 </mapper>
