@@ -76,8 +76,8 @@ public class exportTop {
         for (Map eqId : eqIds) {
             Map map = new HashMap();
             map.put("eqId", StringUtils.checkNull(eqId.get("eqId")));
-            map.put("startTime", "1609290000000");
-            map.put("endTime", "1611882000000");
+            map.put("startTime", "1611882000000");
+            map.put("endTime", "1612227600000");
             List<Map<String, String>> list = pmTenantUserMapper.list(map);
             Map<String, String> tmpMap = new HashMap();
             tmpMap.put("dotSum", "0");
