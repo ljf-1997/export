@@ -30,13 +30,187 @@
         and create_time &lt;= #{endTime}
     </select>
     <update id="updataValue" parameterType="java.util.Map">
-		update pm_consumables_equipment
-		<set>
-		user_low_threshold = #{firstThreshold,jdbcType=BIGINT},
-        user_high_threshold = #{secondThreshold,jdbcType=BIGINT},
-        time_alar_threshold = #{finalThreshold,jdbcType=BIGINT}
+        update pm_consumables_equipment
+        <set>
+            user_low_threshold = #{firstThreshold,jdbcType=BIGINT},
+            user_high_threshold = #{secondThreshold,jdbcType=BIGINT},
+            time_alar_threshold = #{finalThreshold,jdbcType=BIGINT}
         </set>
-		where equipment_id = #{eqId,jdbcType=BIGINT}
-		and cons_id = #{consId,jdbcType=BIGINT}
-	</update>
+        where equipment_id = #{eqId,jdbcType=BIGINT}
+        and cons_id = #{consId,jdbcType=BIGINT}
+    </update>
+    <select id="selectTuisong1" resultType="java.util.Map" parameterType="java.util.Map">
+     select
+       a.id as id,
+       b.EQUIPMENT_NAME as eqName,
+       date_format(FROM_UNIXTIME(a.start_time/1000),'%Y-%m-%d %H:%i:%s') as time,
+       a.chang_coping_count as changCop,
+       c.user_low_threshold as userLow,
+	   f.USER_NAME as userName
+       from tbl_equipment_consum_cycle a
+       left join pm_equipment_info b on a.equipment_id = b.EQUIPMENT_ID
+       inner join pm_consumables_equipment c on a.equipment_id = c.equipment_id
+       left join mp_technique_levels d on a.station_id = d.TECHNIQUE_ID
+       left join mp_tech_user_relation e on e.TECHNIQUE_ID = d.TECHNIQUE_ID
+       left join mp_users f on f.USER_ID = e.USER_ID
+       where 1=1
+       and a.chang_coping_count > c.user_low_threshold
+       and (a.chang_coping_count - c.user_low_threshold)&lt;50
+       and a.start_time &gt;= #{startTime}
+       and a.start_time &lt;= #{endTime}
+       and b.IS_DEL = 'N'
+       and c.is_del = 'N'
+       and d.IS_DEL = 'N'
+       and e.IS_DEL = 'N'
+       order by a.start_time
+    </select>
+    <select id="selectTuisong2" resultType="java.util.Map" parameterType="java.util.Map">
+     select
+       a.id as id,
+       b.EQUIPMENT_NAME as eqName,
+       date_format(FROM_UNIXTIME(a.start_time/1000),'%Y-%m-%d %H:%i:%s') as time,
+       a.chang_coping_count as changCop,
+       c.user_high_threshold as userHigh,
+	   f.USER_NAME as userName
+       from tbl_equipment_consum_cycle a
+       left join pm_equipment_info b on a.equipment_id = b.EQUIPMENT_ID
+       inner join pm_consumables_equipment c on a.equipment_id = c.equipment_id
+       left join mp_technique_levels d on a.station_id = d.TECHNIQUE_ID
+       left join mp_tech_user_relation e on e.TECHNIQUE_ID = d.TECHNIQUE_ID
+       left join mp_users f on f.USER_ID = e.USER_ID
+       where 1=1
+       and a.chang_coping_count > c.user_high_threshold
+       and (a.chang_coping_count - c.user_high_threshold)&lt;50
+       and a.start_time &gt;= #{startTime}
+       and a.start_time &lt;= #{endTime}
+       and b.IS_DEL = 'N'
+       and c.is_del = 'N'
+       and d.IS_DEL = 'N'
+       and e.IS_DEL = 'N'
+       order by a.start_time
+    </select>
+    <select id="selectTuisong3" resultType="java.util.Map" parameterType="java.util.Map">
+     select
+       a.id as id,
+       b.EQUIPMENT_NAME as eqName,
+       date_format(FROM_UNIXTIME(a.start_time/1000),'%Y-%m-%d %H:%i:%s') as time,
+       a.chang_coping_count as changCop,
+       c.time_alar_threshold as timeAlar,
+	   f.USER_NAME as userName
+       from tbl_equipment_consum_cycle a
+       left join pm_equipment_info b on a.equipment_id = b.EQUIPMENT_ID
+       inner join pm_consumables_equipment c on a.equipment_id = c.equipment_id
+       left join mp_technique_levels d on a.station_id = d.TECHNIQUE_ID
+       left join mp_tech_user_relation e on e.TECHNIQUE_ID = d.TECHNIQUE_ID
+       left join mp_users f on f.USER_ID = e.USER_ID
+       where 1=1
+       and a.chang_coping_count > c.time_alar_threshold
+       and (a.chang_coping_count - c.time_alar_threshold)&lt;50
+       and a.start_time &gt;= #{startTime}
+       and a.start_time &lt;= #{endTime}
+       and b.IS_DEL = 'N'
+       and c.is_del = 'N'
+       and d.IS_DEL = 'N'
+       and e.IS_DEL = 'N'
+       order by a.start_time
+    </select>
+    <select id="selectNoTuisongCop" resultType="java.util.Map" parameterType="java.util.Map">
+     select
+       a.id as id,
+       b.EQUIPMENT_NAME as eqName,
+       date_format(FROM_UNIXTIME(a.start_time/1000),'%Y-%m-%d %H:%i:%s') as time,
+       a.chang_coping_count as changCop,
+       c.user_low_threshold as userLow,
+	   f.USER_NAME as userName
+       from tbl_equipment_consum_cycle a
+       left join pm_equipment_info b on a.equipment_id = b.EQUIPMENT_ID
+       inner join pm_consumables_equipment c on a.equipment_id = c.equipment_id
+       left join mp_technique_levels d on a.station_id = d.TECHNIQUE_ID
+       left join mp_tech_user_relation e on e.TECHNIQUE_ID = d.TECHNIQUE_ID
+       left join mp_users f on f.USER_ID = e.USER_ID
+       where 1=1
+       and a.chang_coping_count &lt;c.user_low_threshold
+       and a.start_time &gt;= #{startTime}
+       and a.start_time &lt;= #{endTime}
+       and b.IS_DEL = 'N'
+       and c.is_del = 'N'
+       and d.IS_DEL = 'N'
+       and e.IS_DEL = 'N'
+       order by a.start_time
+    </select>
+    <select id="selectTuisongCop1" resultType="java.util.Map" parameterType="java.util.Map">
+     select
+       a.id as id,
+       b.EQUIPMENT_NAME as eqName,
+       date_format(FROM_UNIXTIME(a.start_time/1000),'%Y-%m-%d %H:%i:%s') as time,
+       a.chang_coping_count as changCop,
+       c.user_low_threshold as userLow,
+	   f.USER_NAME as userName
+       from tbl_equipment_consum_cycle a
+       left join pm_equipment_info b on a.equipment_id = b.EQUIPMENT_ID
+       inner join pm_consumables_equipment c on a.equipment_id = c.equipment_id
+       left join mp_technique_levels d on a.station_id = d.TECHNIQUE_ID
+       left join mp_tech_user_relation e on e.TECHNIQUE_ID = d.TECHNIQUE_ID
+       left join mp_users f on f.USER_ID = e.USER_ID
+       where 1=1
+       and a.chang_coping_count >c.user_low_threshold
+       and (a.chang_coping_count-c.user_low_threshold) >50
+       and a.start_time &gt;= #{startTime}
+       and a.start_time &lt;= #{endTime}
+       and b.IS_DEL = 'N'
+       and c.is_del = 'N'
+       and d.IS_DEL = 'N'
+       and e.IS_DEL = 'N'
+       order by a.start_time
+    </select>
+    <select id="selectTuisongCop2" resultType="java.util.Map" parameterType="java.util.Map">
+     select
+       a.id as id,
+       b.EQUIPMENT_NAME as eqName,
+       date_format(FROM_UNIXTIME(a.start_time/1000),'%Y-%m-%d %H:%i:%s') as time,
+       a.chang_coping_count as changCop,
+       c.user_high_threshold as userHigh,
+	   f.USER_NAME as userName
+       from tbl_equipment_consum_cycle a
+       left join pm_equipment_info b on a.equipment_id = b.EQUIPMENT_ID
+       inner join pm_consumables_equipment c on a.equipment_id = c.equipment_id
+       left join mp_technique_levels d on a.station_id = d.TECHNIQUE_ID
+       left join mp_tech_user_relation e on e.TECHNIQUE_ID = d.TECHNIQUE_ID
+       left join mp_users f on f.USER_ID = e.USER_ID
+       where 1=1
+       and a.chang_coping_count >c.user_high_threshold
+       and (a.chang_coping_count-c.user_low_threshold) >50
+       and a.start_time &gt;= #{startTime}
+       and a.start_time &lt;= #{endTime}
+       and b.IS_DEL = 'N'
+       and c.is_del = 'N'
+       and d.IS_DEL = 'N'
+       and e.IS_DEL = 'N'
+       order by a.start_time
+    </select>
+    <select id="selectTuisongCop3" resultType="java.util.Map" parameterType="java.util.Map">
+     select
+       a.id as id,
+       b.EQUIPMENT_NAME eqName,
+       date_format(FROM_UNIXTIME(a.start_time/1000),'%Y-%m-%d %H:%i:%s') as time,
+       a.chang_coping_count as changCop,
+       c.time_alar_threshold as timeAlar,
+	   f.USER_NAME as userName
+       from tbl_equipment_consum_cycle a
+       left join pm_equipment_info b on a.equipment_id = b.EQUIPMENT_ID
+       inner join pm_consumables_equipment c on a.equipment_id = c.equipment_id
+       left join mp_technique_levels d on a.station_id = d.TECHNIQUE_ID
+       left join mp_tech_user_relation e on e.TECHNIQUE_ID = d.TECHNIQUE_ID
+       left join mp_users f on f.USER_ID = e.USER_ID
+       where 1=1
+       and a.chang_coping_count >c.time_alar_threshold
+       and (a.chang_coping_count-c.user_low_threshold) >50
+       and a.start_time &gt;= #{startTime}
+       and a.start_time &lt;= #{endTime}
+       and b.IS_DEL = 'N'
+       and c.is_del = 'N'
+       and d.IS_DEL = 'N'
+       and e.IS_DEL = 'N'
+       order by a.start_time
+    </select>
 </mapper>

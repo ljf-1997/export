@@ -1,38 +1,50 @@
 package com.exportexcel.export.server;
 
 import com.exportexcel.export.exportMapper.PmTenantUserMapper;
+import com.exportexcel.utils.StringUtils;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.exportexcel.utils.StringUtils;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Service
-public class exportServer {
+public class ExportServer {
 
-    private final static Logger log = LoggerFactory.getLogger(exportChangeCop.class);
+    private final static Logger log = LoggerFactory.getLogger(ExportChangeCop.class);
 
     @Autowired(required = false)
     private PmTenantUserMapper pmTenantUserMapper;
 
     public void export() throws FileNotFoundException {
-
-    //查询红旗电极帽报警任务推送的信息
+        //查询红旗电极帽报警任务推送的信息
         Map queryMap = new HashMap();
         Calendar yesterdayStart = Calendar.getInstance();
-        yesterdayStart.add(Calendar.DATE, -2);
+        Date startDate = null;
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        try {
+            startDate = sdf.parse("2021-03-18 00:00:00");
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        yesterdayStart.setTime(startDate);
+        yesterdayStart.add(Calendar.DATE, -2);
         yesterdayStart.set(Calendar.HOUR_OF_DAY, 23);
         yesterdayStart.set(Calendar.MINUTE, 58);
         yesterdayStart.set(Calendar.SECOND, 59);
         System.out.println(sdf.format(yesterdayStart.getTime()));
         Calendar todayEnd = Calendar.getInstance();
+        todayEnd.setTime(startDate);
         todayEnd.add(Calendar.DATE, -1);
         todayEnd.set(Calendar.HOUR_OF_DAY, 23);
         todayEnd.set(Calendar.MINUTE, 58);
@@ -40,8 +52,8 @@ public class exportServer {
         System.out.println(sdf.format(todayEnd.getTime()));
         queryMap.put("startTime", sdf.format(yesterdayStart.getTime()));
         queryMap.put("endTime", sdf.format(todayEnd.getTime()));
-        List<Map<String,String>> selectTaskList = pmTenantUserMapper.selectTaskList(queryMap);
-        if(selectTaskList.size()>0 && selectTaskList !=null) {
+        List<Map<String, String>> selectTaskList = pmTenantUserMapper.selectTaskList(queryMap);
+        if (selectTaskList.size() > 0 && selectTaskList != null) {
             String[] timeArray = {"00:00:00", "00:30:00", "01:00:00", "01:30:00", "02:00:00", "02:30:00", "03:00:00", "03:30:00", "04:00:00", "04:30:00"
                     , "05:00:00", "05:30:00", "06:00:00", "06:30:00", "07:00:00", "07:30:00", "08:00:00", "08:30:00", "09:00:00", "09:30:00", "10:00:00", "10:30:00"
                     , "11:00:00", "11:30:00", "12:00:00", "12:30:00", "13:00:00", "13:30:00", "14:00:00", "14:30:00", "15:00:00", "15:30:00", "16:00:00"
@@ -109,7 +121,8 @@ public class exportServer {
             String template = "./template/红旗电极帽点检数据统计.xlsx";
             XSSFWorkbook workbook = null;
             try {
-                workbook = new XSSFWorkbook(new FileInputStream(template));
+                FileInputStream inputStream = new FileInputStream(template);
+                workbook = new XSSFWorkbook(inputStream);
                 XSSFSheet sheet = workbook.getSheet("Sheet2");
                 for (String val : zb) {
                     String[] value = val.split(",");
@@ -122,8 +135,7 @@ public class exportServer {
                 e.printStackTrace();
             }
             System.out.println("导出成功！！！");
-        }
-        else {
+        } else {
             System.out.println("红旗今天不生产！！！");
         }
     }

@@ -15,4 +15,18 @@ public interface PmTenantUserMapper{
 
     void updataValue(Map map);
 
+    List<Map> selectTuisong1(Map map);
+
+    List<Map> selectTuisong2(Map map);
+
+    List<Map> selectTuisong3(Map map);
+
+    List<Map> selectNoTuisongCop(Map map);
+
+    List<Map> selectTuisongCop1(Map map);
+
+    List<Map> selectTuisongCop2(Map map);
+
+    List<Map> selectTuisongCop3(Map map);
+
 }
