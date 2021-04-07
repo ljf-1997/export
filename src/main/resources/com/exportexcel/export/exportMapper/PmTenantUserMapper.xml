@@ -55,6 +55,7 @@
        left join mp_users f on f.USER_ID = e.USER_ID
        where 1=1
        and a.chang_coping_count > c.user_low_threshold
+       and a.chang_coping_count &lt; c.user_high_threshold
        and (a.chang_coping_count - c.user_low_threshold)&lt;50
        and a.start_time &gt;= #{startTime}
        and a.start_time &lt;= #{endTime}
@@ -62,7 +63,7 @@
        and c.is_del = 'N'
        and d.IS_DEL = 'N'
        and e.IS_DEL = 'N'
-       order by a.start_time
+       order by a.id
     </select>
     <select id="selectTuisong2" resultType="java.util.Map" parameterType="java.util.Map">
      select
@@ -80,6 +81,7 @@
        left join mp_users f on f.USER_ID = e.USER_ID
        where 1=1
        and a.chang_coping_count > c.user_high_threshold
+       and a.chang_coping_count &lt; c.time_alar_threshold
        and (a.chang_coping_count - c.user_high_threshold)&lt;50
        and a.start_time &gt;= #{startTime}
        and a.start_time &lt;= #{endTime}
@@ -87,7 +89,7 @@
        and c.is_del = 'N'
        and d.IS_DEL = 'N'
        and e.IS_DEL = 'N'
-       order by a.start_time
+       order by a.id
     </select>
     <select id="selectTuisong3" resultType="java.util.Map" parameterType="java.util.Map">
      select
@@ -112,7 +114,7 @@
        and c.is_del = 'N'
        and d.IS_DEL = 'N'
        and e.IS_DEL = 'N'
-       order by a.start_time
+       order by a.id
     </select>
     <select id="selectNoTuisongCop" resultType="java.util.Map" parameterType="java.util.Map">
      select
@@ -136,7 +138,7 @@
        and c.is_del = 'N'
        and d.IS_DEL = 'N'
        and e.IS_DEL = 'N'
-       order by a.start_time
+       order by a.id
     </select>
     <select id="selectTuisongCop1" resultType="java.util.Map" parameterType="java.util.Map">
      select
@@ -154,6 +156,7 @@
        left join mp_users f on f.USER_ID = e.USER_ID
        where 1=1
        and a.chang_coping_count >c.user_low_threshold
+       and a.chang_coping_count &lt;c.user_high_threshold
        and (a.chang_coping_count-c.user_low_threshold) >50
        and a.start_time &gt;= #{startTime}
        and a.start_time &lt;= #{endTime}
@@ -161,7 +164,7 @@
        and c.is_del = 'N'
        and d.IS_DEL = 'N'
        and e.IS_DEL = 'N'
-       order by a.start_time
+       order by a.id
     </select>
     <select id="selectTuisongCop2" resultType="java.util.Map" parameterType="java.util.Map">
      select
@@ -179,6 +182,7 @@
        left join mp_users f on f.USER_ID = e.USER_ID
        where 1=1
        and a.chang_coping_count >c.user_high_threshold
+       and a.chang_coping_count &lt;c.time_alar_threshold
        and (a.chang_coping_count-c.user_low_threshold) >50
        and a.start_time &gt;= #{startTime}
        and a.start_time &lt;= #{endTime}
@@ -186,7 +190,7 @@
        and c.is_del = 'N'
        and d.IS_DEL = 'N'
        and e.IS_DEL = 'N'
-       order by a.start_time
+       order by a.id
     </select>
     <select id="selectTuisongCop3" resultType="java.util.Map" parameterType="java.util.Map">
      select
@@ -211,6 +215,6 @@
        and c.is_del = 'N'
        and d.IS_DEL = 'N'
        and e.IS_DEL = 'N'
-       order by a.start_time
+      order by a.id
     </select>
 </mapper>
