@@ -77,7 +77,7 @@ public class ReadealExcelImplService implements ReadealExcelService {
                 if (column == 6) list6.add(StringUtils.checkInt(cell));
             }
         }
-//        List<Map> getListValue3 = getList(list3,list6,rowNumbers);
+        List<Map> getListValue3 = getList(list3,list6,rowNumbers);
         List<Map> getListValue4 = getList(list4,list6,rowNumbers);
         List<Map> getListValue5 = getList(list5,list6,rowNumbers);
         return getListValue4;
@@ -88,28 +88,21 @@ public class ReadealExcelImplService implements ReadealExcelService {
         int num = 0;
         List tmpList = new ArrayList();
         int flagValue = 0;
-        String flagKey = null;
         Map map = new HashMap();
-        map.put(list.get(0), flagValue);
+        map.put(list.get(0), 0);
         for (int indexs = 0; indexs <= rowNumbers - 3; indexs++) {
             String val = StringUtils.checkNull(list.get(indexs));
-            if (!map.containsKey(val) && indexs != 0) {
-                for (int i = num; i <= indexs - 1; i++) {
-                    num = indexs;
-                    flagValue += StringUtils.checkInt(list6.get(i));
+            if (map.containsKey(val) && indexs != 0) {
+                if(StringUtils.checkInt(list6.get(indexs)) == 1){
+                    map.put(list.get(indexs), (StringUtils.checkInt(map.get(list.get(indexs)))+1));
                 }
-                flagKey = StringUtils.checkNull(list.get(indexs - 1));
-                map.put(flagKey, flagValue);
-                flagValue = 0;
-                map.put(list.get(indexs), flagValue);
-            }
-            if (indexs == (rowNumbers - 3)) {
-                for (int i = num; i <= rowNumbers - 3; i++) {
-                    num = 0;
-                    flagValue += StringUtils.checkInt(list6.get(i));
+            }else {
+                if(StringUtils.checkInt(list6.get(indexs)) == 1){
+                    map.put(list.get(indexs), 1);
                 }
-                flagKey = StringUtils.checkNull(list.get(indexs));
-                map.put(flagKey, flagValue);
+                else {
+                    map.put(list.get(indexs), 0);
+                }
             }
         }
         tmpList.add(map);
