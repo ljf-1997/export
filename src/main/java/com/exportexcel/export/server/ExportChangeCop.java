@@ -3,12 +3,16 @@ package com.exportexcel.export.server;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.exportexcel.utils.StringUtils;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -17,74 +21,74 @@ public class ExportChangeCop {
 
     private final static Logger log = LoggerFactory.getLogger(ExportChangeCop.class);
 
-//    public static void main(String[] args) throws IOException {
-//        //读取工作表
-//        XSSFWorkbook workbook = null;
-//        XSSFWorkbook wb = null;
-//        Map<String, Map<String, String>> map = new HashMap();
-//        try {
-//            int indexs = 1;
-//            File dir = new File("C:\\Users\\12858\\Desktop\\20年项目出差");
-//            String[] names = dir.list();
-//            List<Map> value = new ArrayList<>();
-//            for (int j = 0; j < names.length; j++) {
-//                System.out.println(names[j]);
-//                String template = "C:\\Users\\12858\\Desktop\\20年项目出差\\" + names[j];
-//                System.out.println(template);
-//                workbook = new XSSFWorkbook(new FileInputStream(template));
-//                int index = workbook.getNumberOfSheets();
-//                calculateData(value, workbook, index, names[j]);
-//            }
-//            map = dealValue(value);
-//            try {
-//                String templates = "C:\\Users\\12858\\Desktop\\1.xlsx";
-//                wb = new XSSFWorkbook(new FileInputStream(templates));
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//                System.out.println(e);
-//            }
-//            XSSFSheet sheet = wb.getSheetAt(0);
-//            for (Map.Entry<String, Map<String, String>> entry : map.entrySet()) {
-//                int i = 0;
-//                XSSFRow row = sheet.getRow(indexs);
-//                if (row == null) {
-//                    row = sheet.createRow(indexs);
-//                }
-//                Map<String, String> tmp = entry.getValue();
-//                for (Map.Entry<String, String> entryNew : tmp.entrySet()) {
-//                    if (entryNew.getKey().equals("number")) {
-//                        int k = StringUtils.checkInt(tmp.get("mounth")) + 4;
-//                        XSSFCell cell = row.getCell(k);
-//                        if (cell == null) {
-//                            cell = row.createCell(k);
-//                        }
-//                        cell.setCellValue(entryNew.getValue());
-//                    } else if (entryNew.getKey().equals("mounth")) {
-//                        XSSFCell cell = row.getCell(i);
-//                    } else {
-//                        XSSFCell cell = row.getCell(i);
-//                        if (cell == null) {
-//                            cell = row.createCell(i);
-//                        }
-//                        cell.setCellValue(entryNew.getValue());
-//                    }
-//                    i++;
-//                }
-//                indexs++;
-//            }
-//            FileOutputStream out = new FileOutputStream(new File("C:\\Users\\12858\\Desktop\\1.xlsx"));
-//            wb.write(out);
-//            out.close();
-//            System.out.println("导出完成！");
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            System.out.println(e);
-//        } finally {
-//            if (workbook != null) {
-//                workbook.close();
-//            }
-//        }
-//    }
+    public void Read(String[] args) throws IOException {
+        //读取工作表
+        XSSFWorkbook workbook = null;
+        XSSFWorkbook wb = null;
+        Map<String, Map<String, String>> map = new HashMap();
+        try {
+            int indexs = 1;
+            File dir = new File("C:\\Users\\12858\\Desktop\\20年项目出差");
+            String[] names = dir.list();
+            List<Map> value = new ArrayList<>();
+            for (int j = 0; j < names.length; j++) {
+                System.out.println(names[j]);
+                String template = "C:\\Users\\12858\\Desktop\\20年项目出差\\" + names[j];
+                System.out.println(template);
+                workbook = new XSSFWorkbook(new FileInputStream(template));
+                int index = workbook.getNumberOfSheets();
+                calculateData(value, workbook, index, names[j]);
+            }
+            map = dealValue(value);
+            try {
+                String templates = "C:\\Users\\12858\\Desktop\\1.xlsx";
+                wb = new XSSFWorkbook(new FileInputStream(templates));
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.out.println(e);
+            }
+            XSSFSheet sheet = wb.getSheetAt(0);
+            for (Map.Entry<String, Map<String, String>> entry : map.entrySet()) {
+                int i = 0;
+                XSSFRow row = sheet.getRow(indexs);
+                if (row == null) {
+                    row = sheet.createRow(indexs);
+                }
+                Map<String, String> tmp = entry.getValue();
+                for (Map.Entry<String, String> entryNew : tmp.entrySet()) {
+                    if (entryNew.getKey().equals("number")) {
+                        int k = StringUtils.checkInt(tmp.get("mounth")) + 4;
+                        XSSFCell cell = row.getCell(k);
+                        if (cell == null) {
+                            cell = row.createCell(k);
+                        }
+                        cell.setCellValue(entryNew.getValue());
+                    } else if (entryNew.getKey().equals("mounth")) {
+                        XSSFCell cell = row.getCell(i);
+                    } else {
+                        XSSFCell cell = row.getCell(i);
+                        if (cell == null) {
+                            cell = row.createCell(i);
+                        }
+                        cell.setCellValue(entryNew.getValue());
+                    }
+                    i++;
+                }
+                indexs++;
+            }
+            FileOutputStream out = new FileOutputStream(new File("C:\\Users\\12858\\Desktop\\1.xlsx"));
+            wb.write(out);
+            out.close();
+            System.out.println("导出完成！");
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println(e);
+        } finally {
+            if (workbook != null) {
+                workbook.close();
+            }
+        }
+    }
 
     private static List<Map> calculateData(List<Map> values, XSSFWorkbook workbook, int index, String fileName) throws IOException {
         for (int i = 0; i < index; i++) {

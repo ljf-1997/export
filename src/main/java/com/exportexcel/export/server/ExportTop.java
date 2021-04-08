@@ -23,8 +23,7 @@ public class ExportTop {
     private PmTenantUserMapper pmTenantUserMapper;
 
     public void dealAndExportValues() {
-        List<Map> value = new ArrayList<>();
-        value = getTopValues();
+        List<Map> value = getTopValues();
         System.out.println("数据读取成功！");
         XSSFWorkbook workbook = null;
         try {
@@ -112,8 +111,8 @@ public class ExportTop {
         for (Map eqId : eqIds) {
             Map map = new HashMap();
             map.put("eqId", StringUtils.checkNull(eqId.get("eqId")));
-            map.put("startTime", "1611849600000");
-            map.put("endTime", "1614528000000");
+            map.put("startTime", "1611504000000");
+            map.put("endTime", "1617724800000");
             List<Map<String, String>> list = pmTenantUserMapper.list(map);
             Map<String, String> tmpMap = new HashMap();
             tmpMap.put("dotSum", "0");
