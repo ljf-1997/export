@@ -20,6 +20,11 @@ import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author: 12858
@@ -43,8 +48,8 @@ public class ExportTimeMaxService {
         int i = 0;
         int j = 0;
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        startDate = sdf.parse("2021-1-13 08:00:00");
-        endDate = sdf.parse("2021-2-11 23:00:00");
+        startDate = sdf.parse("2021-4-12 08:00:00");
+        endDate = sdf.parse("2021-4-16 23:00:00");
         Integer duration = daysBetween(sdf.format(startDate), sdf.format(endDate));
         System.out.println("总天数：" + duration);
         List<Map> timeList = new ArrayList<>();
@@ -93,10 +98,10 @@ public class ExportTimeMaxService {
                 twentyList.add(timeList.get(m));
             }
         }
-//        List eightDataList = getList(eightList);
-//        List twelveDataList = getList(twelveList);
-        List twentyDataList = getList(twentyList);
-        exportvalue(twentyDataList, request, respons);
+        List<Map<String, String>> eightDataList = getList(eightList);
+//        List<Map<String, String>> twelveDataList = getList(twelveList);
+//        List<Map<String, String>> twentyDataList = getList(twentyList);
+        exportvalue(eightDataList, request, respons);
     }
 
     @SneakyThrows
@@ -104,99 +109,111 @@ public class ExportTimeMaxService {
         List<Map> eqIds = pmTenantUserMapper.eqId();
         List<Map> dataList = new ArrayList<>();
         //遍历查询机器人同一时间下的最大打点值
+        final CountDownLatch latch = new CountDownLatch(eqIds.size());
+        ExecutorService cachedThreadPool = Executors.newFixedThreadPool(eqIds.size());
         for (Map eqId : eqIds) {
             //查询
-            List<Map> list1 = new ArrayList();
-            for (Map time : list) {
-                Map timeMap = new HashMap();
-                timeMap.put("startTime", time.get("startTime"));
-                timeMap.put("endTime", time.get("endTime"));
-                timeMap.put("eqId", eqId.get("eqId"));
-                //剔除换帽的打点为0的情况
-                List<Map> getValFlag = pmTenantUserMapper.getValFlag(timeMap);
-                if(getValFlag != null && getValFlag.size()>0)continue;
-                List<Map> getList = pmTenantUserMapper.getList(timeMap);
-                int size = getList.size();
-                for (int i = 0; i < size - 1; i++) {
-                    for (int j = 0; j < size - 1 - i; j++) {
-                        //交换两数位置
-                        if (StringUtils.checkInt(getList.get(j).get("dotSum")) < StringUtils.checkInt(getList.get(j + 1).get("dotSum"))) {
-                            Map map1 = getList.get(j);
-                            getList.set(j, getList.get(j + 1));
-                            getList.set(j + 1, map1);
+            Runnable runnable = new Runnable() {
+                @Override
+                public void run() {
+                    System.out.println("子线程" + Thread.currentThread().getName() + "开始执行");
+                    List<Map> list1 = new ArrayList();
+                    for (Map time : list) {
+                        Map timeMap = new HashMap();
+                        timeMap.put("startTime", time.get("startTime"));
+                        timeMap.put("endTime", time.get("endTime"));
+                        timeMap.put("eqId", eqId.get("eqId"));
+                        //剔除换帽的打点为0的情况
+                        List<Map> getValFlag = pmTenantUserMapper.getValFlag(timeMap);
+                        if (getValFlag != null && getValFlag.size() > 0) continue;
+                        List<Map> getList = pmTenantUserMapper.getList(timeMap);
+                        int size = getList.size();
+                        for (int i = 0; i < size - 1; i++) {
+                            for (int j = 0; j < size - 1 - i; j++) {
+                                //交换两数位置
+                                if (StringUtils.checkInt(getList.get(j).get("dotSum")) < StringUtils.checkInt(getList.get(j + 1).get("dotSum"))) {
+                                    Map map1 = getList.get(j);
+                                    getList.set(j, getList.get(j + 1));
+                                    getList.set(j + 1, map1);
+                                }
+                            }
+                        }
+                        Map map = new HashMap();
+                        if (getList.size() != 0 && getList != null) {
+                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                            map.put("maxDotSum", StringUtils.checkNull(getList.get(0).get("dotSum")));
+                            map.put("minDotSum", StringUtils.checkNull(getList.get(getList.size() - 1).get("dotSum")));
+                            map.put("dotSum", (StringUtils.checkInt(getList.get(0).get("dotSum")) - StringUtils.checkInt(getList.get(getList.size() - 1).get("dotSum"))));
+                            map.put("time", sdf.format(new Date(StringUtils.checkLong(getList.get(0).get("time")))));
+                        }
+                        if (getList.size() == 0) {
+                            Map maps = new HashMap();
+                            maps.put("maxDotSum", "0");
+                            maps.put("minDotSum", "0");
+                            maps.put("dotSum", "0");
+                            list1.add(maps);
+                        }
+                        System.out.println(getList);
+                        if (getList != null) {
+                            list1.add(map);
                         }
                     }
-                }
-                Map map = new HashMap();
-                if (getList.size() != 0 && getList != null){
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    map.put("maxDotSum",StringUtils.checkNull(getList.get(0).get("dotSum")));
-                    map.put("minDotSum",StringUtils.checkNull(getList.get(getList.size()-1).get("dotSum")));
-                    map.put("dotSum",(StringUtils.checkInt(getList.get(0).get("dotSum"))-StringUtils.checkInt(getList.get(getList.size()-1).get("dotSum"))));
-                    map.put("time", sdf.format(new Date(StringUtils.checkLong(getList.get(0).get("time")))));
-                }
-                if(getList.size() == 0){
-                    Map maps = new HashMap();
-                    maps.put("maxDotSum","0");
-                    maps.put("minDotSum","0");
-                    maps.put("dotSum","0");
-                    list1.add(maps);
-                }
-                System.out.println(getList);
-                if (getList != null) {
-                    list1.add(map);
-                }
-            }
-            //拿到机器人在同一时间下最大的打点值
-            Map alar = pmTenantUserMapper.getAlar(StringUtils.checkNull(eqId.get("eqId")));
-            int size = list1.size();
-            for (int i = 0; i < size - 1; i++) {
-                for (int j = 0; j < size - 1 - i; j++) {
-                    //交换两数位置
-                    if (StringUtils.checkInt(list1.get(j).get("dotSum")) < StringUtils.checkInt(list1.get(j + 1).get("dotSum"))) {
-                        Map map1 = list1.get(j);
-                        list1.set(j, list1.get(j + 1));
-                        list1.set(j + 1, map1);
-                    }
-                }
-            }
-            Map dotMap = new HashMap();
-            System.out.println(list1);
-            if (list1 != null && list1.size() > 0 && list1.get(0) != null) {
-                for (Map map : list1) {
-                    if (alar != null && alar.size() != 0) {
-                        if (StringUtils.checkInt(alar.get("alarNum")) > StringUtils.checkInt(map.get("dotSum"))) {
-                            dotMap.put("dotSum", StringUtils.checkNull(map.get("dotSum")));
-                            dotMap.put("maxDotSum", StringUtils.checkNull(map.get("maxDotSum")));
-                            dotMap.put("minDotSum", StringUtils.checkNull(map.get("minDotSum")));
-                            dotMap.put("eqName", StringUtils.checkNull(eqId.get("eqName")));
-                            dotMap.put("time", StringUtils.checkNull(map.get("time")));
-                            break;
-                        } else if (StringUtils.checkInt(alar.get("alarNum")) < StringUtils.checkInt(map.get("dotSum"))) {
-                            dotMap.put("dotSum", StringUtils.checkNull(alar.get("alarNum")));
-                            dotMap.put("maxDotSum", StringUtils.checkNull(map.get("maxDotSum")));
-                            dotMap.put("minDotSum", StringUtils.checkNull(map.get("minDotSum")));
-                            dotMap.put("eqName", StringUtils.checkNull(eqId.get("eqName")));
-                            dotMap.put("time", StringUtils.checkNull(map.get("time")));
+                    //拿到机器人在同一时间下最大的打点值
+                    Map alar = pmTenantUserMapper.getAlar(StringUtils.checkNull(eqId.get("eqId")));
+                    int size = list1.size();
+                    for (int i = 0; i < size - 1; i++) {
+                        for (int j = 0; j < size - 1 - i; j++) {
+                            //交换两数位置
+                            if (StringUtils.checkInt(list1.get(j).get("dotSum")) < StringUtils.checkInt(list1.get(j + 1).get("dotSum"))) {
+                                Map map1 = list1.get(j);
+                                list1.set(j, list1.get(j + 1));
+                                list1.set(j + 1, map1);
+                            }
                         }
-                    } else {
-                        dotMap.put("dotSum", StringUtils.checkNull(list1.get(list1.size() - 1).get("dotSum")));
-                        dotMap.put("maxDotSum", StringUtils.checkNull(list1.get(list1.size() - 1).get("maxDotSum")));
-                        dotMap.put("minDotSum", StringUtils.checkNull(list1.get(list1.size() - 1).get("minDotSum")));
-                        dotMap.put("eqName", StringUtils.checkNull(eqId.get("eqName")));
-                        dotMap.put("time", StringUtils.checkNull(list1.get(list1.size() - 1).get("time")));
                     }
+                    Map dotMap = new HashMap();
+                    System.out.println(list1);
+                    if (list1 != null && list1.size() > 0 && list1.get(0) != null) {
+                        for (Map map : list1) {
+                            if (alar != null && alar.size() != 0) {
+                                if (StringUtils.checkInt(alar.get("alarNum")) > StringUtils.checkInt(map.get("dotSum"))) {
+                                    dotMap.put("dotSum", StringUtils.checkNull(map.get("dotSum")));
+                                    dotMap.put("maxDotSum", StringUtils.checkNull(map.get("maxDotSum")));
+                                    dotMap.put("minDotSum", StringUtils.checkNull(map.get("minDotSum")));
+                                    dotMap.put("eqName", StringUtils.checkNull(eqId.get("eqName")));
+                                    dotMap.put("time", StringUtils.checkNull(map.get("time")));
+                                    break;
+                                } else if (StringUtils.checkInt(alar.get("alarNum")) < StringUtils.checkInt(map.get("dotSum"))) {
+                                    dotMap.put("dotSum", StringUtils.checkNull(alar.get("alarNum")));
+                                    dotMap.put("maxDotSum", StringUtils.checkNull(map.get("maxDotSum")));
+                                    dotMap.put("minDotSum", StringUtils.checkNull(map.get("minDotSum")));
+                                    dotMap.put("eqName", StringUtils.checkNull(eqId.get("eqName")));
+                                    dotMap.put("time", StringUtils.checkNull(map.get("time")));
+                                }
+                            } else {
+                                dotMap.put("dotSum", StringUtils.checkNull(list1.get(list1.size() - 1).get("dotSum")));
+                                dotMap.put("maxDotSum", StringUtils.checkNull(list1.get(list1.size() - 1).get("maxDotSum")));
+                                dotMap.put("minDotSum", StringUtils.checkNull(list1.get(list1.size() - 1).get("minDotSum")));
+                                dotMap.put("eqName", StringUtils.checkNull(eqId.get("eqName")));
+                                dotMap.put("time", StringUtils.checkNull(list1.get(list1.size() - 1).get("time")));
+                            }
+                        }
+                        dataList.add(dotMap);
+                    }
+                    System.out.println("子线程" + Thread.currentThread().getName() + "执行完成");
+                    latch.countDown();//当前线程调用此方法，则计数减一
+                    System.out.println(latch);
                 }
-                dataList.add(dotMap);
-            }
+            };
+            cachedThreadPool.execute(runnable);
+        }
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
         return dataList;
     }
-
-    public static String comparingByName(Map map) {
-        return StringUtils.checkNull(map.get("dotSum"));
-    }
-
 
     /**
      * 字符串的日期格式的计算
@@ -255,19 +272,19 @@ public class ExportTimeMaxService {
         int index = 1;
         for (Map<String, String> tmp : list) {
             int k = 0;
-            XSSFRow row = sheet.getRow(index);
-            if (row == null) {
-                row = sheet.createRow(index);
-            }
-            for (String key : tmp.keySet()) {
-                XSSFCell cell = row.getCell(k);
-                if (cell == null) {
-                    cell = row.createCell(k);
+                XSSFRow row = sheet.getRow(index);
+                if (row == null) {
+                    row = sheet.createRow(index);
                 }
-                sheet.getRow(0).getCell(k).setCellValue(key);
-                sheet.getRow(index).getCell(k).setCellValue(tmp.get(key));
-                k++;
-            }
+                for (String key : tmp.keySet()) {
+                    XSSFCell cell = row.getCell(k);
+                    if (cell == null) {
+                        cell = row.createCell(k);
+                    }
+//                    sheet.getRow(0).getCell(k).setCellValue(key);
+                    sheet.getRow(index).getCell(k).setCellValue(tmp.get(key));
+                    k++;
+                }
             index++;
         }
         try {
