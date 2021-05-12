@@ -31,7 +31,7 @@ public class ExportExcel {
 
     public Result importValue() throws IOException {
         Result result = new Result();
-        String template = "C:\\Users\\12858\\Desktop\\电极帽报警值(2)(1).xlsx";
+        String template = "C:\\Users\\12858\\Desktop\\电极帽报警值.xlsx";
         List<Map> excelValues = readExcel(template);
         for (Map tmp:excelValues) {
             Map queryMap = new HashMap();

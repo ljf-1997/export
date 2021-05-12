@@ -29,6 +29,46 @@
         and  create_time &gt;= #{startTime}
         and create_time &lt;= #{endTime}
     </select>
+    <select id="startList" resultType="java.util.Map">
+        SELECT
+        tc.equipment_id as equimentId,
+        pi.equipment_name as eqName,
+        date_format(from_unixtime(tc.create_time / 1000), '%Y-%m-%d %H:%i:%s') AS timestamp,
+        val as dotSum
+        from mp_realtime_consum_data tc
+        left join pm_equipment_info pi on tc.equipment_id = pi.equipment_id
+        where tc.equipment_id = #{eqId}
+        and tc.data_type=1
+        and  create_time &gt;= #{startTime}
+        and create_time &lt;= #{endTime}
+        limit 1
+    </select>
+    <select id="getList" resultType="java.util.Map">
+        SELECT
+        val as dotSum,
+        create_time as time
+        from mp_realtime_consum_data tc
+        left join pm_equipment_info pi on tc.equipment_id = pi.equipment_id
+        where tc.equipment_id = #{eqId}
+        and tc.data_type=1
+        and  tc.create_time &gt;= #{startTime}
+        and tc.create_time &lt;= #{endTime}
+    </select>
+    <select id="endList" resultType="java.util.Map">
+        SELECT
+        tc.equipment_id as equimentId,
+        pi.equipment_name as eqName,
+        date_format(from_unixtime(tc.create_time / 1000), '%Y-%m-%d %H:%i:%s') AS timestamp,
+        val as dotSum
+        from mp_realtime_consum_data tc
+        left join pm_equipment_info pi on tc.equipment_id = pi.equipment_id
+        where tc.equipment_id = #{eqId}
+        and tc.data_type=1
+        and  create_time &gt;= #{startTime}
+        and create_time &lt;= #{endTime}
+        ORDER BY create_time
+        desc limit 1
+    </select>
     <update id="updataValue" parameterType="java.util.Map">
         update pm_consumables_equipment
         <set>
@@ -115,6 +155,25 @@
        and d.IS_DEL = 'N'
        and e.IS_DEL = 'N'
        order by a.id
+    </select>
+    <select id="selectTuisongData" resultType="java.util.Map" parameterType="java.util.Map">
+        SELECT DISTINCT pm.task_time as time,
+        pm.task_name as name,
+        pm.attribute1 as warnData,
+        pm.attribute2 as warnType,
+        pm.equipment_id as eqId,
+        tbl.chang_coping_count as changeData
+        FROM pm_task_info pm
+        LEFT JOIN tbl_equipment_consum_cycle tbl ON tbl.equipment_id = pm.equipment_id
+        WHERE 1 = 1
+        AND pm.task_time &lt;= #{endTime}
+        AND pm.task_time &gt;= #{startTime}
+        AND pm.task_type = 'YHP'
+        AND tbl.chang_coping_count > pm.attribute1
+        AND (tbl.chang_coping_count-pm.attribute1)&lt;=50
+        AND pm.attribute1 IS NOT NULL
+        AND pm.is_del = 'N'
+        ORDER BY pm.equipment_id
     </select>
     <select id="selectNoTuisongCop" resultType="java.util.Map" parameterType="java.util.Map">
      select
@@ -216,5 +275,57 @@
        and d.IS_DEL = 'N'
        and e.IS_DEL = 'N'
       order by a.id
+    </select>
+    <select id="selectName" resultType="java.util.Map" parameterType="java.util.Map">
+     select
+       a.id as id,
+       b.EQUIPMENT_NAME eqName,
+	   f.USER_NAME as userName
+       from pm_equipment_info b
+       left join tbl_equipment_consum_cycle a on a.equipment_id = b.EQUIPMENT_ID
+       left join mp_technique_levels d on a.station_id = d.TECHNIQUE_ID
+       left join mp_tech_user_relation e on e.TECHNIQUE_ID = d.TECHNIQUE_ID
+       left join mp_users f on f.USER_ID = e.USER_ID
+       where 1=1
+       and b.IS_DEL = 'N'
+       and d.IS_DEL = 'N'
+       and e.IS_DEL = 'N'
+       order by eqName
+    </select>
+    <select id="selectTuisongCopData" resultType="java.util.Map" parameterType="java.util.Map">
+        SELECT DISTINCT pm.task_time as time,
+        pm.task_name as name,
+        pm.attribute1 as warnData,
+        pm.attribute2 as warnType,
+        pm.equipment_id as eqId
+        FROM pm_task_info pm
+        WHERE 1 = 1
+        AND pm.task_time &lt;= #{endTime}
+        AND pm.task_time &gt;= #{startTime}
+        AND pm.task_type = 'YHP'
+        AND pm.attribute1 IS NOT NULL
+        AND pm.is_del = 'N'
+        ORDER BY pm.equipment_id
+    </select>
+    <select id="getAlar" resultType="java.util.Map">
+        SELECT
+        time_alar_threshold as alarNum
+        from
+        pm_consumables_equipment
+        where
+        equipment_id = #{eqId}
+        and is_del = 'N'
+    </select>
+    <select id="getValFlag" resultType="java.util.Map">
+        SELECT
+        ID as id
+        from mp_realtime_consum_data tc
+        left join pm_equipment_info pi on tc.equipment_id = pi.equipment_id
+        where tc.equipment_id = #{eqId}
+        and tc.data_type=1
+        and tc.val = 0
+        and  tc.create_time &gt; #{startTime}
+        and tc.create_time &lt; #{endTime}
+        and is_del = 'N'
     </select>
 </mapper>
