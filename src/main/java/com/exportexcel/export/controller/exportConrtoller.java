@@ -15,7 +15,7 @@ public class exportConrtoller {
     private ExportServer server;
 
     @RequestMapping(value = "export")
-    public void export() throws FileNotFoundException {
+    public void export(HttpServletRequest request, HttpServletResponse response) throws FileNotFoundException {
         server.export();
     }
 }
