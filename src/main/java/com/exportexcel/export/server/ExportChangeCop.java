@@ -17,6 +17,12 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ *  出差统计
+ *
+ * @author ljf
+ *
+ */
 public class ExportChangeCop {
 
     private final static Logger log = LoggerFactory.getLogger(ExportChangeCop.class);

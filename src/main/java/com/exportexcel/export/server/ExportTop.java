@@ -16,7 +16,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.*;
-
+/**
+ *  统计顶点信息
+ *
+ * @author ljf
+ *
+ */
 @Service
 public class ExportTop {
 
@@ -27,7 +32,7 @@ public class ExportTop {
 
     @SneakyThrows
     public void dealAndExportValues(HttpServletRequest request, HttpServletResponse respons) {
-        String fileName = "打点最大值内容";
+        String fileName = "顶点值";
         respons.setCharacterEncoding("UTF-8");
         respons.setContentType("application/vnd.ms-excel;charset=UTF-8");
         respons.setHeader("Content-Transfer-Encoding", "binary");
@@ -117,8 +122,8 @@ public class ExportTop {
         for (Map eqId : eqIds) {
             Map map = new HashMap();
             map.put("eqId", StringUtils.checkNull(eqId.get("eqId")));
-            map.put("startTime", "1610467200000");
-            map.put("endTime", "1620748800000");
+            map.put("startTime", "1618416000000");
+            map.put("endTime", "1619107199000");
             List<Map<String, String>> list = pmTenantUserMapper.list(map);
             Map<String, String> tmpMap = new HashMap();
             tmpMap.put("dotSum", "0");

@@ -328,4 +328,9 @@
         and tc.create_time &lt; #{endTime}
         and is_del = 'N'
     </select>
+    <select id="eqIds" resultType="java.util.Map">
+        SELECT EQUIPMENT_ID AS eqId
+        FROM pm_equipment_info
+        WHERE IS_DEL='N'
+    </select>
 </mapper>

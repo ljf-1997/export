@@ -4,7 +4,7 @@
  */
 function submitData(params) {
     $.ajax({
-        url: 'export/export/export',
+        url: 'export/export/changeCup',
         dataType: "json",
         contentType: "application/json; charset=utf-8",
         type: "POST",

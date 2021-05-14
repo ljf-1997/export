@@ -44,5 +44,7 @@ public interface PmTenantUserMapper{
 
     List<Map> selectTuisongCopData(Map map);
 
+    List<Map>  eqIds();
+
     List<Map> selectName(Map map);
 }

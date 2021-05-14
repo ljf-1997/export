@@ -2,6 +2,7 @@ package com.exportexcel.export.server;
 
 import com.exportexcel.export.exportMapper.PmTenantUserMapper;
 import com.exportexcel.utils.StringUtils;
+import lombok.SneakyThrows;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -13,17 +14,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
  * @author: 12858
  * @date: 2021.03.24
- * @Description: 转换红旗报警数据
+ * @Description: 红旗报警数据
  * @Version: 1.0
  */
 @Service
@@ -31,30 +30,38 @@ public class ChangeValueServer {
     @Autowired(required = false)
     private PmTenantUserMapper pmTenantUserMapper;
 
+    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+
+    @SneakyThrows
     public void ChangeValue(HttpServletRequest request, HttpServletResponse respons) {
         Map queryMap = new HashMap();
-        queryMap.put("startTime", "1613869200000");
-        queryMap.put("endTime", "1616461200000");
-        //按钉钉推送换帽
-        List<Map> selectTuisong1 = pmTenantUserMapper.selectTuisong1(queryMap);
-        List<Map> selectTuisong2 = pmTenantUserMapper.selectTuisong2(queryMap);
-        List<Map> selectTuisong3 = pmTenantUserMapper.selectTuisong3(queryMap);
-        List<Map> selectTuisong = Stream.concat(Stream.concat(selectTuisong2.stream(), selectTuisong3.stream()), selectTuisong1.stream()).collect(Collectors.toList());
-        //换帽了没推送
-        List<Map> selectNoTuisongCop = pmTenantUserMapper.selectNoTuisongCop(queryMap);
-        //推送了没换帽
-        List<Map> selectTuisongCop1 = pmTenantUserMapper.selectTuisongCop1(queryMap);
-        List<Map> selectTuisongCop2 = pmTenantUserMapper.selectTuisongCop2(queryMap);
-        List<Map> selectTuisongCop3 = pmTenantUserMapper.selectTuisongCop3(queryMap);
-        List<Map> selectTuisongCop = Stream.concat(Stream.concat(selectTuisongCop2.stream(), selectTuisongCop3.stream()), selectTuisongCop1.stream()).collect(Collectors.toList());
-        List<List<String>> selectTuisongList = getValue(selectNoTuisongCop);
+        queryMap.put("startTime", "2021-5-6 00:00:00");
+        queryMap.put("endTime", "2021-5-13 23:59:59");
+        List<Map> selectTuisongCopData = pmTenantUserMapper.selectTuisongCopData(queryMap);
+        List<Map> list2 = new ArrayList<>();
+        List<Map> eqIds = pmTenantUserMapper.eqIds();
+        List<String> a = new ArrayList<>();
+        List<String> b = new ArrayList<>();
+        for (Map tmp:eqIds) {
+            a.add(StringUtils.checkNull(tmp.get("eqId")));
+        }
+        List<String> eqidsss = new ArrayList<>();
+        //存在报警点
+        for (Map tmp:selectTuisongCopData)  {
+            b.add(StringUtils.checkNull(tmp.get("eqId")));
+            eqidsss.add(StringUtils.checkNull(tmp.get("eqId")));
+        }
+        a.removeAll(b);
+        list2 = getTopValues(a,StringUtils.checkNull(queryMap.get("startTime")));
 
+        String fileName = "没有推送换帽";
         respons.setCharacterEncoding("UTF-8");
         respons.setContentType("application/vnd.ms-excel;charset=UTF-8");
         respons.setHeader("Content-Transfer-Encoding", "binary");
         respons.setHeader("Cache-Control", "must-revalidate, post-check=0, pre-check=0");
         respons.setHeader("Pragma", "public");
-        respons.setHeader("Content-Disposition", "attachment;filename=\"" + "报警信息" + ".xlsx\"");
+        respons.addHeader("Content-Disposition", "attachment; filename=" +new String(fileName.getBytes("utf-8"),"iso-8859-1")+ ".xlsx");
         //导出生成工作表
         OutputStream outputStream = null;
         XSSFWorkbook workbook = null;
@@ -64,21 +71,22 @@ public class ChangeValueServer {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        // 生成一个表格
         XSSFSheet sheet = workbook.createSheet();
         int index = 0;
-        for (List<String> tmp : selectTuisongList) {
-            int i = 0;
+        for (Map<String, String> tmp : list2) {
+            int k = 0;
             XSSFRow row = sheet.getRow(index);
             if (row == null) {
                 row = sheet.createRow(index);
             }
-            for (String value:tmp) {
-                XSSFCell cell = row.getCell(i);
+            for (String key : tmp.keySet()) {
+                XSSFCell cell = row.getCell(k);
                 if (cell == null) {
-                    cell = row.createCell(i);
+                    cell = row.createCell(k);
                 }
-                sheet.getRow(index).getCell(i).setCellValue(value);
-                i++;
+                sheet.getRow(index).getCell(k).setCellValue(tmp.get(key));
+                k++;
             }
             index++;
         }
@@ -90,57 +98,33 @@ public class ChangeValueServer {
         }
         System.out.println("统计成功！");
     }
-
-    //获取数据
-    public List getValue(List<Map> listMap){
-        List list = new ArrayList();
-        String flag = "0";
-        int index = 0;
-        List<String> listValue = new ArrayList();
-        for (Map tmp : listMap) {
-            if (index == 0) {
-                flag = StringUtils.checkNull(tmp.get("id"));
-            }
-            if (!StringUtils.checkNull(tmp.get("id")).equals(flag)) {
-                flag = StringUtils.checkNull(tmp.get("id"));
-                List tmpList = new ArrayList();
-                for (String tmpListValue:listValue) {
-                    tmpList.add(tmpListValue);
+    @SneakyThrows
+    private List<Map> getTopValues(List<String> a,String time) {
+        List<Map> listMap = new ArrayList();
+        for (String eqId : a) {
+            Map map = new HashMap();
+            map.put("eqId", eqId);
+            map.put("startTime", sdf.parse(time).getTime());
+            map.put("endTime", "1620921599000");
+            List<Map<String, String>> list = pmTenantUserMapper.list(map);
+            Map<String, String> tmpMap = new HashMap();
+            tmpMap.put("dotSum", "0");
+            for (Map tmp : list) {
+                if (StringUtils.checkInt(tmp.get("dotSum")) > StringUtils.checkInt(tmpMap.get("dotSum"))) {
+                    tmpMap.put("dotSum", StringUtils.checkNull(tmp.get("dotSum")));
+                    tmpMap.put("eqName", StringUtils.checkNull(tmp.get("eqName")));
+                    tmpMap.put("time", StringUtils.checkNull(tmp.get("timestamp")));
                 }
-                list.add(tmpList);
-                listValue.clear();
-                listValue.add(StringUtils.checkNull(tmp.get("id")));
-                listValue.add(StringUtils.checkNull(tmp.get("eqName")));
-                listValue.add(StringUtils.checkNull(tmp.get("time")));
-                listValue.add(StringUtils.checkNull(tmp.get("changCop")));
-                if (tmp.containsKey("userLow")) {
-                    listValue.add(StringUtils.checkNull(tmp.get("userLow")));
-                } else if (tmp.containsKey("userHigh")) {
-                    listValue.add(StringUtils.checkNull(tmp.get("userHigh")));
-                } else if (tmp.containsKey("timeAlar")) {
-                    listValue.add(StringUtils.checkNull(tmp.get("timeAlar")));
-                }
-                listValue.add(StringUtils.checkNull(tmp.get("userName")));
-            } else {
-                if (listValue.size()==0) {
-                    listValue.add(StringUtils.checkNull(tmp.get("id")));
-                    listValue.add(StringUtils.checkNull(tmp.get("eqName")));
-                    listValue.add(StringUtils.checkNull(tmp.get("time")));
-                    listValue.add(StringUtils.checkNull(tmp.get("changCop")));
-                    if (tmp.containsKey("userLow")) {
-                        listValue.add(StringUtils.checkNull(tmp.get("userLow")));
-                    } else if (tmp.containsKey("userHigh")) {
-                        listValue.add(StringUtils.checkNull(tmp.get("userHigh")));
-                    } else if (tmp.containsKey("timeAlar")) {
-                        listValue.add(StringUtils.checkNull(tmp.get("timeAlar")));
-                    }
-                    listValue.add(StringUtils.checkNull(tmp.get("userName")));
-                } else {
-                    listValue.add(StringUtils.checkNull(tmp.get("userName")));
+                if (StringUtils.checkInt(tmp.get("dotSum")) == 0) {
+                    Map<String, String> mp = new HashMap();
+                    mp.put("dotSum", StringUtils.checkNull(tmpMap.get("dotSum")));
+                    mp.put("eqName", StringUtils.checkNull(tmpMap.get("eqName")));
+                    mp.put("time", StringUtils.checkNull(tmpMap.get("time")));
+                    listMap.add(mp);
+                    tmpMap.clear();
                 }
             }
-            index++;
         }
-        return list;
+        return listMap;
     }
 }

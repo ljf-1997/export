@@ -48,8 +48,8 @@ public class ExportTimeMaxService {
         int i = 0;
         int j = 0;
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        startDate = sdf.parse("2021-4-12 08:00:00");
-        endDate = sdf.parse("2021-4-16 23:00:00");
+        startDate = sdf.parse("2021-3-13 08:00:00");
+        endDate = sdf.parse("2021-4-13 23:00:00");
         Integer duration = daysBetween(sdf.format(startDate), sdf.format(endDate));
         System.out.println("总天数：" + duration);
         List<Map> timeList = new ArrayList<>();
@@ -99,8 +99,31 @@ public class ExportTimeMaxService {
             }
         }
         List<Map<String, String>> eightDataList = getList(eightList);
-//        List<Map<String, String>> twelveDataList = getList(twelveList);
-//        List<Map<String, String>> twentyDataList = getList(twentyList);
+        List<Map<String, String>> twelveDataList = getList(twelveList);
+        List<Map<String, String>> twentyDataList = getList(twentyList);
+        List<Map<String, String>> list = new ArrayList<>();
+//        int index = 0;
+//        for (Map<String,String> map:eightDataList) {
+//            Map value = new HashMap();
+//            //8-12
+//            value.put("机器人",StringUtils.checkNull(map.get("eqName")));
+//            value.put("机器人Id",StringUtils.checkNull(map.get("eqId")));
+//            value.put("8-12最大值",StringUtils.checkNull(map.get("maxDotSum")));
+//            value.put("8-12最小值",StringUtils.checkNull(map.get("minDotSum")));
+//            value.put("8-12最大打点数",StringUtils.checkNull(map.get("dotSum")));
+//            value.put("8-12发生时间",StringUtils.checkNull(map.get("time")));
+//            //12-20
+//            value.put("12-20最大值",StringUtils.checkNull(twelveDataList.get(index).get("maxDotSum")));
+//            value.put("12-20最小值",StringUtils.checkNull(twelveDataList.get(index).get("minDotSum")));
+//            value.put("12-20最大打点数",StringUtils.checkNull(twelveDataList.get(index).get("dotSum")));
+//            value.put("12-20发生时间",StringUtils.checkNull(twelveDataList.get(index).get("time")));
+//            //20-8
+//            value.put("20-8最大值",StringUtils.checkNull(twentyDataList.get(index).get("maxDotSum")));
+//            value.put("20-8最小值",StringUtils.checkNull(twentyDataList.get(index).get("minDotSum")));
+//            value.put("20-8最大打点数",StringUtils.checkNull(twentyDataList.get(index).get("dotSum")));
+//            value.put("20-8发生时间",StringUtils.checkNull(twentyDataList.get(index).get("time")));
+//            list.add(value);
+//        }
         exportvalue(eightDataList, request, respons);
     }
 
@@ -181,6 +204,7 @@ public class ExportTimeMaxService {
                                     dotMap.put("maxDotSum", StringUtils.checkNull(map.get("maxDotSum")));
                                     dotMap.put("minDotSum", StringUtils.checkNull(map.get("minDotSum")));
                                     dotMap.put("eqName", StringUtils.checkNull(eqId.get("eqName")));
+                                    dotMap.put("eqId", StringUtils.checkNull(eqId.get("eqId")));
                                     dotMap.put("time", StringUtils.checkNull(map.get("time")));
                                     break;
                                 } else if (StringUtils.checkInt(alar.get("alarNum")) < StringUtils.checkInt(map.get("dotSum"))) {
@@ -188,6 +212,7 @@ public class ExportTimeMaxService {
                                     dotMap.put("maxDotSum", StringUtils.checkNull(map.get("maxDotSum")));
                                     dotMap.put("minDotSum", StringUtils.checkNull(map.get("minDotSum")));
                                     dotMap.put("eqName", StringUtils.checkNull(eqId.get("eqName")));
+                                    dotMap.put("eqId", StringUtils.checkNull(eqId.get("eqId")));
                                     dotMap.put("time", StringUtils.checkNull(map.get("time")));
                                 }
                             } else {
@@ -195,6 +220,7 @@ public class ExportTimeMaxService {
                                 dotMap.put("maxDotSum", StringUtils.checkNull(list1.get(list1.size() - 1).get("maxDotSum")));
                                 dotMap.put("minDotSum", StringUtils.checkNull(list1.get(list1.size() - 1).get("minDotSum")));
                                 dotMap.put("eqName", StringUtils.checkNull(eqId.get("eqName")));
+                                dotMap.put("eqId", StringUtils.checkNull(eqId.get("eqId")));
                                 dotMap.put("time", StringUtils.checkNull(list1.get(list1.size() - 1).get("time")));
                             }
                         }
@@ -213,6 +239,10 @@ public class ExportTimeMaxService {
             e.printStackTrace();
         }
         return dataList;
+    }
+
+    public static String comparingByName(Map map) {
+        return StringUtils.checkNull(map.get("eqId"));
     }
 
     /**
@@ -272,19 +302,18 @@ public class ExportTimeMaxService {
         int index = 1;
         for (Map<String, String> tmp : list) {
             int k = 0;
-                XSSFRow row = sheet.getRow(index);
-                if (row == null) {
-                    row = sheet.createRow(index);
+            XSSFRow row = sheet.getRow(index);
+            if (row == null) {
+                row = sheet.createRow(index);
+            }
+            for (String key : tmp.keySet()) {
+                XSSFCell cell = row.getCell(k);
+                if (cell == null) {
+                    cell = row.createCell(k);
                 }
-                for (String key : tmp.keySet()) {
-                    XSSFCell cell = row.getCell(k);
-                    if (cell == null) {
-                        cell = row.createCell(k);
-                    }
-//                    sheet.getRow(0).getCell(k).setCellValue(key);
-                    sheet.getRow(index).getCell(k).setCellValue(tmp.get(key));
-                    k++;
-                }
+                sheet.getRow(index).getCell(k).setCellValue(tmp.get(key));
+                k++;
+            }
             index++;
         }
         try {

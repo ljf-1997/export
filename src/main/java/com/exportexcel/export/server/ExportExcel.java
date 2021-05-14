@@ -22,7 +22,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
+/**
+ *  更新报警值
+ *
+ * @author ljf
+ *
+ */
 @Service
 public class ExportExcel {
 
@@ -31,7 +36,7 @@ public class ExportExcel {
 
     public Result importValue() throws IOException {
         Result result = new Result();
-        String template = "C:\\Users\\12858\\Desktop\\电极帽报警值.xlsx";
+        String template = "C:\\Users\\12858\\Desktop\\电极帽报警值(1).xlsx";
         List<Map> excelValues = readExcel(template);
         for (Map tmp:excelValues) {
             Map queryMap = new HashMap();
