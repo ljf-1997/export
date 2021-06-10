@@ -22,7 +22,7 @@ import java.util.stream.Stream;
 /**
  * @author: 12858
  * @date: 2021.03.24
- * @Description: 红旗报警数据
+ * @Description:
  * @Version: 1.0
  */
 @Service
@@ -36,8 +36,8 @@ public class ChangeValueServer {
     @SneakyThrows
     public void ChangeValue(HttpServletRequest request, HttpServletResponse respons) {
         Map queryMap = new HashMap();
-        queryMap.put("startTime", "2021-5-6 00:00:00");
-        queryMap.put("endTime", "2021-5-13 23:59:59");
+        queryMap.put("startTime", "2021-5-27 00:00:00");
+        queryMap.put("endTime", "2021-6-4 00:00:00");
         List<Map> selectTuisongCopData = pmTenantUserMapper.selectTuisongCopData(queryMap);
         List<Map> list2 = new ArrayList<>();
         List<Map> eqIds = pmTenantUserMapper.eqIds();
@@ -105,7 +105,7 @@ public class ChangeValueServer {
             Map map = new HashMap();
             map.put("eqId", eqId);
             map.put("startTime", sdf.parse(time).getTime());
-            map.put("endTime", "1620921599000");
+            map.put("endTime", "1622736000000");
             List<Map<String, String>> list = pmTenantUserMapper.list(map);
             Map<String, String> tmpMap = new HashMap();
             tmpMap.put("dotSum", "0");

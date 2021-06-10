@@ -19,7 +19,6 @@ public interface PmTenantUserMapper{
 
     List<Map> getValFlag(Map map);
 
-
     Map getAlar(String eqId);
 
     List<Map> eqId();
@@ -47,4 +46,8 @@ public interface PmTenantUserMapper{
     List<Map>  eqIds();
 
     List<Map> selectName(Map map);
+
+    Map<String,String> getDotList(Map map);
+
+    List<Map> getEveryDaySend(Map map);
 }

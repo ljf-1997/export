@@ -36,14 +36,14 @@ public class ExportExcel {
 
     public Result importValue() throws IOException {
         Result result = new Result();
-        String template = "C:\\Users\\12858\\Desktop\\电极帽报警值(1).xlsx";
+        String template = "C:\\Users\\12858\\Desktop\\立即报警(1).xlsx";
         List<Map> excelValues = readExcel(template);
         for (Map tmp:excelValues) {
             Map queryMap = new HashMap();
             queryMap.put("consId",StringUtils.checkInt(tmp.get("consId")));
             queryMap.put("eqId",StringUtils.checkInt(tmp.get("eqId")));
-            queryMap.put("firstThreshold",StringUtils.checkInt(tmp.get("firstThreshold")));
-            queryMap.put("secondThreshold",StringUtils.checkInt(tmp.get("secondThreshold")));
+//            queryMap.put("firstThreshold",StringUtils.checkInt(tmp.get("firstThreshold")));
+//            queryMap.put("secondThreshold",StringUtils.checkInt(tmp.get("secondThreshold")));
             queryMap.put("finalThreshold",StringUtils.checkInt(tmp.get("finalThreshold")));
             pmTenantUserMapper.updataValue(queryMap);
         }
@@ -81,13 +81,13 @@ public class ExportExcel {
                         case 1:
                             val.put("eqId", StringUtils.checkNull(cell).split("\\.")[0]);
                             break;
+//                        case 3:
+//                            val.put("firstThreshold", StringUtils.checkNull(cell).split("\\.")[0]);
+//                            break;
+//                        case 4:
+//                                val.put("secondThreshold", StringUtils.checkNull(cell).split("\\.")[0]);
+//                            break;
                         case 3:
-                            val.put("firstThreshold", StringUtils.checkNull(cell).split("\\.")[0]);
-                            break;
-                        case 4:
-                                val.put("secondThreshold", StringUtils.checkNull(cell).split("\\.")[0]);
-                            break;
-                        case 5:
                             val.put("finalThreshold", StringUtils.checkNull(cell).split("\\.")[0]);
                             break;
                         default:

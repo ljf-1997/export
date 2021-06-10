@@ -26,7 +26,7 @@ import static org.openxmlformats.schemas.drawingml.x2006.chart.STTickLblPos.NEXT
 /**
  * @author: 12858
  * @date: 2021.04.06
- * @Description: 阅读并处理exce文档
+ * @Description: 阅读并处理exce文档（Linda姐）
  * @Version: 1.0
  */
 @Slf4j
@@ -52,6 +52,7 @@ public class ReadealExcelImplService implements ReadealExcelService {
     }
 
     public List<Map> calculData(XSSFWorkbook wb, int index, String template) {
+        int num = 0;
         List<Map> list = new ArrayList<>();
         List<String> list3 = new ArrayList();
         List<String> list4 = new ArrayList();
@@ -71,42 +72,33 @@ public class ReadealExcelImplService implements ReadealExcelService {
             for (int column = 3; column < 7; column++) {
                 Cell cell = row.getCell(column);
                 if (cell == null || ((XSSFCell) cell).getRawValue() == null) continue;
-                if (column == 3) list3.add(StringUtils.checkNull(cell));
-                if (column == 4) list4.add(StringUtils.checkNull(cell));
-                if (column == 5) list5.add(StringUtils.checkNull(cell));
-                if (column == 6) list6.add(StringUtils.checkInt(cell));
+                if(column == 3)list3.add(StringUtils.checkNull(cell));
+                if(column == 4)list4.add(StringUtils.checkNull(cell));
+                if(column == 5)list5.add(StringUtils.checkNull(cell));
+                if(column == 6)list6.add(StringUtils.checkInt(cell));
             }
         }
-        List<Map> getListValue3 = getList(list3,list6,rowNumbers);
-        List<Map> getListValue4 = getList(list4,list6,rowNumbers);
-        List<Map> getListValue5 = getList(list5,list6,rowNumbers);
-        return getListValue4;
-    }
-
-
-    public List<Map> getList(List list,List list6,int rowNumbers){
-        int num = 0;
-        List tmpList = new ArrayList();
+        //处理五行
+        List wuXing = new ArrayList();
         int flagValue = 0;
+        String flagKey = null;
         Map map = new HashMap();
-        map.put(list.get(0), 0);
-        for (int indexs = 0; indexs <= rowNumbers - 3; indexs++) {
-            String val = StringUtils.checkNull(list.get(indexs));
-            if (map.containsKey(val) && indexs != 0) {
-                if(StringUtils.checkInt(list6.get(indexs)) == 1){
-                    map.put(list.get(indexs), (StringUtils.checkInt(map.get(list.get(indexs)))+1));
+        map.put(list3.get(0),flagValue);
+        for (int indexs = 0; indexs < rowNumbers-3; indexs++) {
+            String val = list3.get(indexs);
+            if(!map.containsKey(val) && indexs != 0){
+                for(int i = num;i<indexs-1;i++){
+                    num = indexs;
+                    flagValue+=list6.get(i);
                 }
-            }else {
-                if(StringUtils.checkInt(list6.get(indexs)) == 1){
-                    map.put(list.get(indexs), 1);
-                }
-                else {
-                    map.put(list.get(indexs), 0);
-                }
+                flagKey = list3.get(indexs-1);
+                map.put(flagKey,flagValue);
+                flagValue = 0;
+                map.put(list3.get(indexs),flagValue);
             }
         }
-        tmpList.add(map);
-        return tmpList;
+        wuXing.add(map);
+        return wuXing;
     }
 
     @Override

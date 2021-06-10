@@ -293,15 +293,17 @@
        order by eqName
     </select>
     <select id="selectTuisongCopData" resultType="java.util.Map" parameterType="java.util.Map">
-        SELECT DISTINCT pm.task_time as time,
-        pm.task_name as name,
+        SELECT DISTINCT pm.created_date as time,
+        pme.equipment_name as name,
         pm.attribute1 as warnData,
-        pm.attribute2 as warnType,
-        pm.equipment_id as eqId
+        pm.attribute4 as warnType,
+        pm.equipment_id as eqId，
+        pm.task_time as taskTime
         FROM pm_task_info pm
+        LEFT JOIN pm_equipment_info pme on pm.equipment_id = pme.equipment_id
         WHERE 1 = 1
-        AND pm.task_time &lt;= #{endTime}
-        AND pm.task_time &gt;= #{startTime}
+        AND pm.created_date &lt;= #{endTime}
+        AND pm.created_date &gt;= #{startTime}
         AND pm.task_type = 'YHP'
         AND pm.attribute1 IS NOT NULL
         AND pm.is_del = 'N'
@@ -332,5 +334,38 @@
         SELECT EQUIPMENT_ID AS eqId
         FROM pm_equipment_info
         WHERE IS_DEL='N'
+    </select>
+    <select id="getDotList" resultType="java.util.Map">
+ SELECT
+        tc.equipment_id as eqId,
+        pi.equipment_name as eqName,
+        date_format(from_unixtime(tc.create_time / 1000), '%Y-%m-%d %H:%i:%s') AS dateTime,
+        val as dotcount
+        from mp_realtime_consum_data tc
+        left join pm_equipment_info pi on tc.equipment_id = pi.equipment_id
+        where
+        tc.data_type=1
+        and  tc.create_time &gt;= #{startTime}
+        and tc.create_time &lt;= #{endTime}
+        and tc.equipment_id = #{eqId}
+        order by tc.id
+        desc
+        LIMIT 1
+    </select>
+    <select id="getEveryDaySend" resultType="java.util.Map">
+        SELECT
+        pm.task_name as eqName,
+        pm.attribute1 as dotNum,
+        pm.attribute4 as alarmNum,
+        pm.task_time as alarmTime,
+        pm.created_date as sendTime
+        FROM pm_task_info pm
+        WHERE 1 = 1
+        AND pm.created_date &gt;= #{startTime}
+        AND pm.created_date &lt;= #{endTime}
+        AND pm.task_type = 'YHP'
+        AND pm.attribute1 IS NOT NULL
+        AND pm.is_del = 'N'
+        order by pm.task_time
     </select>
 </mapper>

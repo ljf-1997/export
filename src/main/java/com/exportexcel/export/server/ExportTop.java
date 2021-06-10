@@ -120,25 +120,44 @@ public class ExportTop {
         List<Map> eqIds = pmTenantUserMapper.eqId();
         List listMap = new ArrayList();
         for (Map eqId : eqIds) {
+            int flag = 0;
+            int flag2 = 0;
             Map map = new HashMap();
             map.put("eqId", StringUtils.checkNull(eqId.get("eqId")));
-            map.put("startTime", "1618416000000");
-            map.put("endTime", "1619107199000");
+            map.put("startTime", "1622736000000");
+            map.put("endTime", "1623081600000");
             List<Map<String, String>> list = pmTenantUserMapper.list(map);
-            Map<String, String> tmpMap = new HashMap();
-            tmpMap.put("dotSum", "0");
-            for (Map tmp : list) {
-                if (StringUtils.checkInt(tmp.get("dotSum")) > StringUtils.checkInt(tmpMap.get("dotSum"))) {
-                    tmpMap.put("dotSum", StringUtils.checkNull(tmp.get("dotSum")));
-                    tmpMap.put("eqName", StringUtils.checkNull(tmp.get("eqName")));
+            if(list.size()>0) {
+                Map<String, String> tmpMap = new HashMap();
+                tmpMap.put("dotSum", "0");
+                int index = 0;
+                for (Map tmp : list) {
+                    if (StringUtils.checkInt(tmp.get("dotSum")) > StringUtils.checkInt(tmpMap.get("dotSum"))) {
+                        flag = 1;
+                        tmpMap.put("dotSum", StringUtils.checkNull(tmp.get("dotSum")));
+                        tmpMap.put("eqName", StringUtils.checkNull(tmp.get("eqName")));
+                    }
+                    if (StringUtils.checkInt(tmp.get("dotSum")) == 0) {
+                        flag2 = 1;
+                        Map mp = new HashMap();
+                        mp.put("dotSum", StringUtils.checkInt(tmpMap.get("dotSum")));
+                        mp.put("eqName", StringUtils.checkNull(tmpMap.get("eqName")));
+                        listMap.add(mp);
+                        tmpMap.clear();
+                    }
+                    if(flag == 1&&index==(list.size()-1)&&flag2!=1){
+                        Map mp = new HashMap();
+                        mp.put("dotSum", "0");
+                        mp.put("eqName", StringUtils.checkNull(eqId.get("eqName")));
+                        listMap.add(mp);
+                    }
+                    index++;
                 }
-                if (StringUtils.checkInt(tmp.get("dotSum")) == 0) {
-                    Map mp = new HashMap();
-                    mp.put("dotSum", StringUtils.checkInt(tmpMap.get("dotSum")));
-                    mp.put("eqName", StringUtils.checkNull(tmpMap.get("eqName")));
-                    listMap.add(mp);
-                    tmpMap.clear();
-                }
+            }else {
+                Map mp = new HashMap();
+                mp.put("dotSum", "0");
+                mp.put("eqName", StringUtils.checkNull(eqId.get("eqName")));
+                listMap.add(mp);
             }
         }
         return listMap;
