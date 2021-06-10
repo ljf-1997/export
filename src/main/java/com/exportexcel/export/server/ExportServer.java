@@ -18,6 +18,12 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ *  每日报警推送信息（贺经理）
+ *
+ * @author ljf
+ *
+ */
 @Service
 public class ExportServer {
 

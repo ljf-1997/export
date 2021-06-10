@@ -11,6 +11,17 @@ public interface PmTenantUserMapper{
 
     List<Map<String,String>> list(Map map);
 
+    Map<String,String> startList(Map map);
+
+    Map<String,String> endList(Map map);
+
+    List<Map> getList(Map map);
+
+    List<Map> getValFlag(Map map);
+
+
+    Map getAlar(String eqId);
+
     List<Map> eqId();
 
     void updataValue(Map map);
@@ -21,6 +32,8 @@ public interface PmTenantUserMapper{
 
     List<Map> selectTuisong3(Map map);
 
+    List<Map> selectTuisongData(Map map);
+
     List<Map> selectNoTuisongCop(Map map);
 
     List<Map> selectTuisongCop1(Map map);
@@ -29,4 +42,9 @@ public interface PmTenantUserMapper{
 
     List<Map> selectTuisongCop3(Map map);
 
+    List<Map> selectTuisongCopData(Map map);
+
+    List<Map>  eqIds();
+
+    List<Map> selectName(Map map);
 }

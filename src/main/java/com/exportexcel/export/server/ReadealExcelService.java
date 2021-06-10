@@ -7,6 +7,5 @@ import java.io.IOException;
 @Service
 public interface ReadealExcelService {
     void readeal();
-
     void createRadar() throws IOException;
 }

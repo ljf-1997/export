@@ -1,6 +1,7 @@
 package com.exportexcel.export.server;
 
 import com.exportexcel.export.exportMapper.PmTenantUserMapper;
+import lombok.SneakyThrows;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -11,9 +12,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.exportexcel.utils.StringUtils;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.*;
-
+/**
+ *  统计顶点信息
+ *
+ * @author ljf
+ *
+ */
 @Service
 public class ExportTop {
 
@@ -22,19 +30,28 @@ public class ExportTop {
     @Autowired(required = false)
     private PmTenantUserMapper pmTenantUserMapper;
 
-    public void dealAndExportValues() {
+    @SneakyThrows
+    public void dealAndExportValues(HttpServletRequest request, HttpServletResponse respons) {
+        String fileName = "顶点值";
+        respons.setCharacterEncoding("UTF-8");
+        respons.setContentType("application/vnd.ms-excel;charset=UTF-8");
+        respons.setHeader("Content-Transfer-Encoding", "binary");
+        respons.setHeader("Cache-Control", "must-revalidate, post-check=0, pre-check=0");
+        respons.setHeader("Pragma", "public");
+        respons.addHeader("Content-Disposition", "attachment; filename=" + new String(fileName.getBytes("utf-8"), "iso-8859-1") + ".xlsx");
         List<Map> value = getTopValues();
         System.out.println("数据读取成功！");
+        //导出生成工作表
+        OutputStream outputStream = null;
         XSSFWorkbook workbook = null;
+        workbook = new XSSFWorkbook();
         try {
-            String templates = "C:\\Users\\12858\\Desktop\\top.xlsx";
-            workbook = new XSSFWorkbook(new FileInputStream(templates));
+            outputStream = respons.getOutputStream();
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println(e);
         }
         // 生成一个表格
-        XSSFSheet sheet = workbook.getSheetAt(0);
+        XSSFSheet sheet = workbook.createSheet();
         // 遍历集合数据，产生数据行
         int indexs = 0;
         String flag = null;
@@ -72,9 +89,6 @@ public class ExportTop {
         for (String mm : map.keySet()) {
             System.out.println(mm + "------" + map.get(mm));
             Iterator<String> it = map.get(mm).iterator();
-            if (it.hasNext()) {
-                System.out.println(map.get(mm));
-            }
             int i = 1;
             if (value != null) {
                 XSSFRow row = sheet.getRow(indexs);
@@ -95,24 +109,21 @@ public class ExportTop {
             }
     }
         try {
-            FileOutputStream out = new FileOutputStream(new File("C:\\Users\\12858\\Desktop\\top.xlsx"));
-            workbook.write(out);
-            out.close();
+            workbook.write(outputStream);
+            outputStream.flush();
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println(e);
         }
         System.out.println("导出成功！");
     }
     private List<Map> getTopValues() {
         List<Map> eqIds = pmTenantUserMapper.eqId();
-        System.out.println(eqIds);
         List listMap = new ArrayList();
         for (Map eqId : eqIds) {
             Map map = new HashMap();
             map.put("eqId", StringUtils.checkNull(eqId.get("eqId")));
-            map.put("startTime", "1611504000000");
-            map.put("endTime", "1617724800000");
+            map.put("startTime", "1618416000000");
+            map.put("endTime", "1619107199000");
             List<Map<String, String>> list = pmTenantUserMapper.list(map);
             Map<String, String> tmpMap = new HashMap();
             tmpMap.put("dotSum", "0");
@@ -131,62 +142,5 @@ public class ExportTop {
             }
         }
         return listMap;
-    }
-
-    public static void main(String[] args) {
-        List<Map> list = new ArrayList();
-        Map<String, String> tmpMap = new HashMap();
-        tmpMap.put("dotSum", "0");
-        Map<String, String> queryMap = new HashMap();
-        queryMap.put("eqName", "FF010");
-        queryMap.put("dotSum", "1000");
-        list.add(queryMap);
-        Map<String, String> queryMap1 = new HashMap();
-        queryMap1.put("eqName", "FF010");
-        queryMap1.put("dotSum", "2000");
-        list.add(queryMap1);
-        Map<String, String> queryMap2 = new HashMap();
-        queryMap2.put("eqName", "FF020");
-        queryMap2.put("dotSum", "3000");
-        list.add(queryMap2);
-        Map<String, String> queryMap3 = new HashMap();
-        queryMap3.put("eqName", "FF020");
-        queryMap3.put("dotSum", "4000");
-        list.add(queryMap3);
-        Map<String, String> queryMap4 = new HashMap();
-        queryMap4.put("eqName", "FF020");
-        queryMap4.put("dotSum", "5000");
-        list.add(queryMap4);
-        String flag = null;
-        Map map = new HashMap();
-        List<String> listMap = new ArrayList();
-        int i = 1;
-        for (Map va : list) {
-            if (StringUtils.checkNull(va.get("eqName")).equals(flag)) {
-                if(i==list.size()){
-                    listMap.add(StringUtils.checkNull(va.get("dotSum")));
-                    List tmp = new ArrayList();
-                    for (String tmpValue:listMap) {
-                        tmp.add(tmpValue);
-                    }
-                    map.put(flag,tmp);
-                }
-                listMap.add(StringUtils.checkNull(va.get("dotSum")));
-            } else {
-                if(i==list.size()){
-                    map.put(StringUtils.checkNull(va.get("eqName")),StringUtils.checkNull(va.get("dotSum")));
-                }
-                List tmp = new ArrayList();
-                for (String tmpValue:listMap) {
-                    tmp.add(tmpValue);
-                }
-                map.put(flag,tmp);
-                listMap.clear();
-                flag = StringUtils.checkNull(va.get("eqName"));
-                listMap.add(StringUtils.checkNull(va.get("dotSum")));
-            }
-            i++;
-        }
-        System.out.println(map);
     }
 }
