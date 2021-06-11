@@ -368,4 +368,11 @@
         AND pm.is_del = 'N'
         order by pm.task_time
     </select>
+    <select id="getAlarmValue" resultType="java.util.Map">
+         select
+          attribute1 as `values`
+        from pm_consumables_equipment
+        where is_del = 'N'
+          and equipment_id = #{eqId,jdbcType=BIGINT}
+    </select>
 </mapper>

@@ -39,10 +39,10 @@ public class ChangeCupService {
     public void changeCup(HttpServletRequest request, HttpServletResponse respons) {
         Map queryMap = new HashMap();
         //需求时间范围求得推送点
-        queryMap.put("startTime", "2021-6-4 00:00:00");
-        queryMap.put("endTime", "2021-6-8 00:00:00");
+        queryMap.put("startTime", "2021-6-3 00:00:00");
+        queryMap.put("endTime", "2021-6-11 00:00:00");
         //当天时间范围拿到换帽点
-        queryMap.put("endTImes", "2021-6-8 00:00:00");
+        queryMap.put("endTImes", "2021-6-11 00:00:00");
         List<Map> selectTuisongCopData = pmTenantUserMapper.selectTuisongCopData(queryMap);
         List<Map<String, String>> list = new LinkedList<>();
         for (Map tmp : selectTuisongCopData) {

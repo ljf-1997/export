@@ -49,5 +49,7 @@ public interface PmTenantUserMapper{
 
     Map<String,String> getDotList(Map map);
 
+    Map getAlarmValue(Long consEqId);
+
     List<Map> getEveryDaySend(Map map);
 }

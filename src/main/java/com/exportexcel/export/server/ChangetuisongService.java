@@ -38,10 +38,10 @@ public class ChangetuisongService {
     public void changetuisong(HttpServletRequest request, HttpServletResponse respons) {
         Map queryMap = new HashMap();
         //需求时间范围求得推送点
-        queryMap.put("startTime", "2021-6-8 05:00:00");
-        queryMap.put("endTime", "2021-6-9 05:00:00");
+        queryMap.put("startTime", "2021-6-3 00:00:00");
+        queryMap.put("endTime", "2021-6-11 00:00:00");
         //当天时间范围拿到换帽点
-        queryMap.put("endTImes","2021-6-9 05:00:00");
+        queryMap.put("endTImes","2021-6-11 00:00:00");
         List<Map> selectTuisongCopData = pmTenantUserMapper.selectTuisongCopData(queryMap);
         List<Map> list = new ArrayList<>();
         List<Map> list1 = new ArrayList<>();
@@ -97,7 +97,7 @@ public class ChangetuisongService {
         // 生成一个表格
         XSSFSheet sheet = workbook.createSheet();
         int index = 0;
-        for (Map<String, String> tmp : list) {
+        for (Map<String, String> tmp : list1) {
             int k = 0;
             XSSFRow row = sheet.getRow(index);
             if (row == null) {
