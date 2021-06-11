@@ -8,15 +8,10 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
@@ -36,8 +31,7 @@ public class ExportDotValueService {
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     @SneakyThrows
-    public void exportDotValue(HttpServletRequest request, HttpServletResponse respons) {
-        List<Map<String,String>> timeList = new ArrayList();
+    public void exportDotValue(HttpServletRequest request, HttpServletResponse respons) {List<Map<String,String>> timeList = new ArrayList();
         for(int i = 0; i<3;i++){
             switch (i){
                 case 0:
@@ -55,34 +49,37 @@ public class ExportDotValueService {
             }
         }
         List<Map> eqIds = pmTenantUserMapper.eqId();
-        List<Map> getDotValues = new ArrayList<>();
+        List<List<String>> getDotValues = new ArrayList<>();
         for (Map eqId : eqIds) {
             List dotCount = new ArrayList();
             Map mapTmp = new HashMap();
-            List valueList = new ArrayList<>();
+            List<String> valueList = new ArrayList<>();
+            //时间三层循环
+            int index = 0;
+            valueList.add(StringUtils.checkNull(eqId.get("eqName")));
+            valueList.add(StringUtils.checkNull(eqId.get("eqId")));
             for (Map tmp : timeList) {
                 Map map = new HashMap();
                 map.put("eqId", StringUtils.checkNull(eqId.get("eqId")));
                 map.put("startTime", StringUtils.checkNull(tmp.get("startTime")));
                 map.put("endTime", StringUtils.checkNull(tmp.get("endTime")));
                 Map<String, String> mapValue = pmTenantUserMapper.getDotList(map);
-                mapTmp = new HashMap();
-                if (mapValue != null) {
-                    mapTmp.put("eqId", StringUtils.checkNull(eqId.get("eqId")));
-                    mapTmp.put("eqName", StringUtils.checkNull(eqId.get("eqName")));
-                    valueList.add(StringUtils.checkNull(mapValue.get("dotcount")));
-                }else {
-                    mapTmp.put("eqId", StringUtils.checkNull(eqId.get("eqId")));
-                    mapTmp.put("eqName", StringUtils.checkNull(eqId.get("eqName")));
-                    valueList.add("0");
+                Map<String, String> mapAlarm = pmTenantUserMapper.getAlarmValue(StringUtils.checkLong(eqId.get("eqId")));
+                if(mapAlarm !=null){
+                    String fileIds = StringUtils.checkNull(mapAlarm.get("values")).replace("[","").replace("]","");
+                    String[] finalValue = fileIds.split(",");
+                    mapTmp = new HashMap();
+                    if (mapValue != null) {
+                        valueList.add(StringUtils.checkNull(mapValue.get("dotcount")));
+                        valueList.add(finalValue[index]);
+                    }else {
+                        valueList.add(StringUtils.checkNull("0"));
+                        valueList.add(finalValue[index]);
+                    }
+                    index++;
                 }
             }
-            String resultString = "";
-            if (valueList.size() > 0) {
-                resultString = listToString(valueList,',');
-                mapTmp.put("dotCount", resultString);
-                getDotValues.add(mapTmp);
-            }
+            getDotValues.add(valueList);
         }
 
 
@@ -105,18 +102,18 @@ public class ExportDotValueService {
         // 生成一个表格
         XSSFSheet sheet = workbook.createSheet();
         int index = 0;
-        for (Map<String, String> tmp : getDotValues) {
+        for (List<String> tmp : getDotValues) {
             int k = 0;
             XSSFRow row = sheet.getRow(index);
             if (row == null) {
                 row = sheet.createRow(index);
             }
-            for (String key : tmp.keySet()) {
+            for (String key : tmp) {
                 XSSFCell cell = row.getCell(k);
                 if (cell == null) {
                     cell = row.createCell(k);
                 }
-                sheet.getRow(index).getCell(k).setCellValue(tmp.get(key));
+                sheet.getRow(index).getCell(k).setCellValue(key);
                 k++;
             }
             index++;
