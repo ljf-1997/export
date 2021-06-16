@@ -153,40 +153,33 @@ public class ExportDotValueService {
         return queryMap;
     }
 
+    @SneakyThrows
     public static void main(String[] args) {
-        Map queryMap = new HashMap();
-        Calendar yesterdayStart = Calendar.getInstance();
-        Date startDate = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        yesterdayStart.setTime(startDate);
-        yesterdayStart.add(Calendar.DATE, -1);
-        yesterdayStart.set(Calendar.HOUR_OF_DAY, 20);
-        yesterdayStart.set(Calendar.MINUTE, 00);
-        yesterdayStart.set(Calendar.SECOND, 00);
-        yesterdayStart.set(Calendar.MILLISECOND, 00);
-        Long yesterday=yesterdayStart.getTimeInMillis();
-        System.out.println(yesterday);
-        Calendar todayEnd = Calendar.getInstance();
-        todayEnd.setTime(startDate);
-        todayEnd.add(Calendar.DATE, 0);
-        todayEnd.set(Calendar.HOUR_OF_DAY, 8);
-        todayEnd.set(Calendar.MINUTE, 00);
-        todayEnd.set(Calendar.SECOND, 00);
-        todayEnd.set(Calendar.MILLISECOND, 00);
-        Long today=todayEnd.getTimeInMillis();
-        System.out.println(today);
-        queryMap.put("startTime", StringUtils.checkNull(yesterday));
-        queryMap.put("endTime", StringUtils.checkNull(today));
-        System.out.println(queryMap);
-    }
-    public String listToString(List list, char separator) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < list.size(); i++) {
-            sb.append(list.get(i));
-            if (i < list.size() - 1) {
-                sb.append(separator);
-            }
+        SimpleDateFormat sdf1 = new SimpleDateFormat("MM-dd");
+        List<Map> timeList = new ArrayList<>();
+        String startTime = "2021-6-1 00:00:00";
+        String endTime = "2021-6-5 00:00:00";
+        Long startDate = StringUtils.checkLong(sdf.parse(startTime).getTime());
+        Long endDate = StringUtils.checkLong(sdf.parse(endTime).getTime());
+        Long tmpDate = 0L;
+        while (tmpDate<endDate){
+            Map queryMap = new HashMap();
+            tmpDate = startDate+86400000;
+            queryMap.put("startTime", startDate);
+            queryMap.put("endTime", tmpDate);
+            timeList.add(queryMap);
+            startDate = tmpDate;
         }
-        return sb.toString();
+//        System.out.println(timeList);
+        List finalValue = new ArrayList();
+        for (Map tmp:timeList) {
+            Map tmpValueMap = new HashMap();
+            String time1 = sdf1.format(new Date(StringUtils.checkLong(tmp.get("startTime"))));
+            String time2 = sdf1.format(new Date(StringUtils.checkLong(tmp.get("endTime"))));
+            tmpValueMap.put("time",time1+"-->"+time2);
+            finalValue.add(tmpValueMap);
+        }
+        System.out.println(finalValue);
     }
 }
