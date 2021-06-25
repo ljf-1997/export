@@ -36,8 +36,8 @@ public class GetEveryDayTopService {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         List<Map> timeList = new ArrayList<>();
         List<Map> finalValue = new ArrayList();
-        String startTime = "2021-6-1 00:00:00";
-        String endTime = "2021-6-3 00:00:00";
+        String startTime = "2021-6-18 00:00:00";
+        String endTime = "2021-6-25 00:00:00";
         Long startDate = StringUtils.checkLong(sdf.parse(startTime).getTime());
         Long endDate = StringUtils.checkLong(sdf.parse(endTime).getTime());
         Long tmpDate = 0L;
@@ -140,11 +140,6 @@ public class GetEveryDayTopService {
                     }
                     index++;
                 }
-            }else {
-                Map mp = new HashMap();
-                mp.put("dotSum", "0");
-                mp.put("eqName", StringUtils.checkNull(eqId.get("eqName")));
-                listMap.add(mp);
             }
         }
         return listMap;

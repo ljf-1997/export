@@ -124,8 +124,8 @@ public class ExportTop {
             int flag2 = 0;
             Map map = new HashMap();
             map.put("eqId", StringUtils.checkNull(eqId.get("eqId")));
-            map.put("startTime", "1622649600000");
-            map.put("endTime", "1623340800000");
+            map.put("startTime", "1623945600000");
+            map.put("endTime", "1624550400000");
             List<Map<String, String>> list = pmTenantUserMapper.list(map);
             if(list.size()>0) {
                 Map<String, String> tmpMap = new HashMap();
